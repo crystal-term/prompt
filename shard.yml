@@ -1,0 +1,9 @@
+name: prompt
+version: 0.1.0
+
+authors:
+  - Chris Watson <cawatson1993@gmail.com>
+
+crystal: 0.34.0
+
+license: MIT
