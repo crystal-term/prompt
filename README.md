@@ -363,13 +363,13 @@ end
 #   Jax
 ```
 
-By default the choice name is used as return value, but you can provide your custom values including a Proc object:
+By default the choice name is used as return value, but you can provide custom values:
 
 ```crystal
 prompt.select("Choose your destiny?") do |menu|
   menu.choice "Scorpion", "1"
   menu.choice "Kano", "2"
-  menu.choice "Jax", -> { "Nice choice captain!" }
+  menu.choice "Jax", "Nice choice captain!"
 end
 # =>
 # Choose your destiny? (Use ↑/↓ arrow keys, press Enter to select)
@@ -391,9 +391,9 @@ To mark particular answer as selected use `default` with index of the option sta
 prompt.select("Choose your destiny?") do |menu|
   menu.default 3
 
-  menu.choice "Scorpion", 1
-  menu.choice "Kano", 2
-  menu.choice "Jax", 3
+  menu.choice "Scorpion", "1"
+  menu.choice "Kano", "2"
+  menu.choice "Jax", "3"
 end
 # =>
 # Choose your destiny? (Use ↑/↓ arrow keys, press Enter to select)
@@ -419,9 +419,9 @@ For ordered choices set `separator` to any delimiter String. In that way, you ca
 prompt.select("Choose your destiny?") do |menu|
   menu.separator ")"
 
-  menu.choice "Scorpion", 1
-  menu.choice "Kano", 2
-  menu.choice "Jax", 3
+  menu.choice "Scorpion", "1"
+  menu.choice "Kano", "2"
+  menu.choice "Jax", "3"
 end
 # =>
 # Choose your destiny? (Use ↑/↓ arrow or number (0-9) keys, press Enter to select)
