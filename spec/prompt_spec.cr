@@ -1,6 +1,6 @@
 require "./spec_helper"
 
-describe Prompt do
+describe Term::Prompt do
   # TODO: Write tests
 
   it "works" do
