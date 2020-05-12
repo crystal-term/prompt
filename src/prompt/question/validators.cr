@@ -5,7 +5,7 @@ module Term
         class RequiredValidator < Validator
           def call(question : Question, value : String?) : Bool
             if value.to_s.strip.empty? && !question.default?
-              question.errors << "Required field"
+              question.errors << "Value is required"
               false
             else
               true
