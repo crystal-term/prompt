@@ -11,4 +11,4 @@ choices = [
   "Vim"
 ]
 
-prompt.enum_list("Select an editor", choices, default: 2)
+prompt.enum_select("Select an editor", choices, default: 2)

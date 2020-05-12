@@ -48,7 +48,7 @@ module Term
       @env            = options[:env]? || ENV.to_h
       @prefix         = options[:prefix]? || ""
       @palette        = options[:palette]? || Palette.new
-      @interrupt      = options[:interrupt]? || :signal
+      @interrupt      = options[:interrupt]? || :error
       @track_history  = options[:track_history]? || true
       @symbols        = Symbols.symbols.merge(options[:symbols]? || {} of Symbol => String)
 
@@ -187,17 +187,17 @@ module Term
     # Example:
     # ```
     # editors = %w(emacs nano vim)
-    # prompt.enum_list("Select editor:", editors)
+    # prompt.enum_select("Select editor:", editors)
     # ```
-    def enum_list(question, choices = nil, **options, &block : EnumList ->)
+    def enum_select(question, choices = nil, **options, &block : EnumList ->)
       choices = choices.nil? ? [] of Choice : choices
       list = EnumList.new(self, **options)
       list.call(question, choices, &block)
     end
 
     # ditto
-    def enum_list(question, choices = nil, **options)
-      enum_list(question, choices, **options) { }
+    def enum_select(question, choices = nil, **options)
+      enum_select(question, choices, **options) { }
     end
 
     # Ask a question with a list of options

@@ -444,7 +444,7 @@ prompt.select("Choose your destiny?", choices, help: "(Bash keyboard)", symbols:
 
 #### `:page_size`
 
-By default the menu is paginated if selection grows beyond 6 items. To change this setting use `:per_page` option.
+By default the menu is paginated if selection grows beyond 6 items. To change this setting use `:page_size` option.
 
 ```crystal
 letters = ("A".."Z").to_a
@@ -542,7 +542,498 @@ If the user changes or deletes a filter, the choices previously selected remain 
 
 ## `#multi_select`
 
-TODO
+For asking questions involving multiple selections use the `#multi_select` method by passing the question and possible choices:
+
+```crystal
+choices = %w(vodka beer wine whisky bourbon)
+prompt.multi_select("Select drinks?", choices)
+# =>
+#
+# Select drinks? (Use ↑/↓ arrow keys, press Space to select and Enter to finish)"
+# ‣ ⬡ vodka
+#   ⬡ beer
+#   ⬡ wine
+#   ⬡ whisky
+#   ⬡ bourbon
+```
+
+As a return value, `multi_select` will always return an array populated with the names of the choices. If you wish to return custom values for the available choices do:
+
+```crystal
+choices = {vodka: "1", beer: "2", wine: "3", whisky: "4", bourbon: "}
+prompt.multi_select("Select drinks?", choices)
+
+# Provided that vodka and beer have been selected, the function will return
+# => ["1", "2"]
+```
+
+Similar to the `#select` method, you can also provide options through the DSL using the `choice` method for single entry and/or `choices` for more than one choice:
+
+```crystal
+prompt.multi_select("Select drinks?") do |menu|
+  menu.choice :vodka, "1"
+  menu.choice :beer, "2"
+  menu.choice :wine, "3"
+  menu.choices whisky: "4", bourbon: "5"
+end
+```
+
+To mark choice(s) as selected use the `default` option with index(s) of the option(s) starting from 1:
+
+```crystal
+prompt.multi_select("Select drinks?") do |menu|
+  menu.default 2, 5
+
+  menu.choice :vodka,   "1"
+  menu.choice :beer,    "2"
+  menu.choice :wine,    "3"
+  menu.choice :whisky,  "4"
+  menu.choice :bourbon, "5"
+end
+# =>
+# Select drinks? beer, bourbon
+#   ⬡ vodka
+#   ⬢ beer
+#   ⬡ wine
+#   ⬡ whisky
+# ‣ ⬢ bourbon
+```
+
+Like select, for ordered choices set `separator` to any delimiter String. In that way, you can use arrows keys and the numbers (0-9) to select the item.
+
+```crystal
+prompt.multi_select("Select drinks?") do |menu|
+  menu.separator ")"
+
+  menu.choice :vodka,   "1"
+  menu.choice :beer,    "2"
+  menu.choice :wine,    "3"
+  menu.choice :whisky,  "4"
+  menu.choice :bourbon, "5"
+end
+# =>
+# Select drinks? beer, bourbon
+#   ⬡ 1) vodka
+#   ⬢ 2) beer
+#   ⬡ 3) wine
+#   ⬡ 4) whisky
+# ‣ ⬢ 5) bourbon
+```
+
+And when you press enter you will see the following selected:
+
+```
+# Select drinks? beer, bourbon
+# => ["2", "5"]
+```
+
+Also like, `select`, the method takes an option `cycle` (which defaults to false), which lets you configure whether the selection should cycle around when reaching the top/bottom of the list:
+
+```crystal
+prompt.multi_select("Select drinks?", %w(vodka beer wine), cycle: true)
+```
+
+You can configure help message and/or marker like so
+
+```crystal
+choices = {vodka: "1", beer: "2", wine: "3", whisky: "4", bourbon: "5"}
+prompt.multi_select("Select drinks?", choices, help: "Press beer can against keyboard")
+# =>
+# Select drinks? (Press beer can against keyboard)"
+# ‣ ⬡ vodka
+#   ⬡ beer
+#   ⬡ wine
+#   ⬡ whisky
+#   ⬡ bourbon
+```
+
+By default the menu is paginated if selection grows beyond `6` items. To change this setting use the `:page_size` option:
+
+```crystal
+letters = ("A".."Z").to_a
+prompt.multi_select("Choose your letter?", letters, page_size: 4)
+# =>
+# Which letter? (Use ↑/↓ and ←/→ arrow keys, press Space to select and Enter to finish)
+# ‣ ⬡ A
+#   ⬡ B
+#   ⬡ C
+#   ⬡ D
+```
+
+#### `:disabled`
+
+To disable menu choice, use the `:disabled` key with a value that explains the reason for the choice being unavailable. For example, out of all drinks, the sake and beer are currently out of stock:
+
+drinks = [
+  "bourbon",
+  {name: "sake", disabled: "(out of stock)"},
+  "vodka",
+  {name: "beer", disabled: "(out of stock)"},
+  "wine",
+  "whisky"
+]
+
+The disabled choice will be displayed with a cross `✘` character next to it and followed by an explanation:
+
+```crystal
+prompt.multi_select("Choose your favourite drink?", drinks)
+# =>
+# Choose your favourite drink? (Use ↑/↓ arrow keys, press Space to select and Enter to finish)
+# ‣ ⬡ bourbon
+#   ✘ sake (out of stock)
+#   ⬡ vodka
+#   ✘ beer (out of stock)
+#   ⬡ wine
+#   ⬡ whisky
+```
+
+#### `:echo`
+
+To control whether the selected items are shown on the question header use the `:echo` option:
+
+```crystal
+choices = %w(vodka beer wine whisky bourbon)
+prompt.multi_select("Select drinks?", choices, echo: false)
+# =>
+# Select drinks?
+#   ⬡ vodka
+#   ⬢ 2) beer
+#   ⬡ 3) wine
+#   ⬡ 4) whisky
+# ‣ ⬢ 5) bourbon
+```
+
+#### `:filter`
+
+To activate dynamic list filtering on letter/number typing, use the `:filter` option:
+
+```crystal
+choices = %w(vodka beer wine whisky bourbon)
+prompt.multi_select("Select drinks?", choices, filter: true)
+# =>
+# Select drinks? (Use ↑/↓ arrow keys, press Space to select and Enter to finish, and letter keys to filter)
+# ‣ ⬡ vodka
+#   ⬡ beer
+#   ⬡ wine
+#   ⬡ whisky
+#   ⬡ bourbon
+```
+
+#### `:filter`
+
+To activate dynamic list filtering on letter/number typing, use the `:filter` option:
+
+```crystal
+choices = %w(vodka beer wine whisky bourbon)
+prompt.multi_select("Select drinks?", choices, filter: true)
+# =>
+# Select drinks? (Use ↑/↓ arrow keys, press Space to select and Enter to finish, and letter keys to filter)
+# ‣ ⬡ vodka
+#   ⬡ beer
+#   ⬡ wine
+#   ⬡ whisky
+#   ⬡ bourbon
+```
+
+After the user presses "w":
+
+```
+# Select drinks? (Filter: "w")
+# ‣ ⬡ wine
+#   ⬡ whisky
+```
+
+Filter characters can be deleted partially or entirely via Backspace and Delete respectively.
+
+If the user changes or deletes a filter, the choices previously selected remain selected.
+
+The filter option is not compatible with `:separator`.
+
+#### `:min`
+
+To force the minimum number of choices an user must select, use the `:min` option:
+
+```crystal
+choices = %w(vodka beer wine whisky bourbon)
+prompt.multi_select("Select drinks?", choices, min: 3)
+# =>
+# Select drinks? (min. 3) vodka, beer
+#   ⬢ vodka
+#   ⬢ beer
+#   ⬡ wine
+#   ⬡ wiskey
+# ‣ ⬡ bourbon
+```
+
+#### `:max`
+
+To limit the number of choices an user can select, use the `:max` option:
+
+```crystal
+choices = %w(vodka beer wine whisky bourbon)
+prompt.multi_select("Select drinks?", choices, max: 3)
+# =>
+# Select drinks? (max. 3) vodka, beer, whisky
+#   ⬢ vodka
+#   ⬢ beer
+#   ⬡ wine
+#   ⬢ whisky
+# ‣ ⬡ bourbon
+```
+
+### `#enum_select`
+
+In order to ask for standard selection from indexed list you can use `#enum_select` and pass question together with possible choices:
+
+```crystal
+choices = %w(emacs nano vim)
+prompt.enum_select("Select an editor?")
+# =>
+#
+# Select an editor?
+#   1) nano
+#   2) vim
+#   3) emacs
+#   Choose 1-3 [1]:
+```
+
+Similar to `select` and `multi_select`, you can provide question options through DSL using choice method and/or choices like so:
+
+```crystal
+choices = %w(nano vim emacs)
+prompt.enum_select("Select an editor?") do |menu|
+  menu.choice "nano",  "/bin/nano"
+  menu.choice "vim",   "/usr/bin/vim"
+  menu.choice "emacs", "/usr/bin/emacs"
+end
+# =>
+#
+# Select an editor?
+#   1) nano
+#   2) vim
+#   3) emacs
+#   Choose 1-3 [1]:
+#
+# Select an editor? /bin/nano
+```
+
+You can change the indexed numbers by passing `separator` option and the default option by using default like so
+
+```crystal
+choices = %w(nano vim emacs)
+prompt.enum_select("Select an editor?") do |menu|
+  menu.default 2
+  menu.separator "."
+
+  menu.choice "nano",  "/bin/nano"
+  menu.choice "vim",   "/usr/bin/vim"
+  menu.choice "emacs", "/usr/bin/emacs"
+end
+# =>
+#
+# Select an editor?
+#   1. nano
+#   2. vim
+#   3. emacs
+#   Choose 1-3 [2]:
+#
+# Select an editor? /usr/bin/vim
+```
+
+#### `:page_size`
+
+By default the menu is paginated if selection grows beyond `6` items. To change this setting use `:page_size` configuration.
+
+```crystal
+letters = ("A".."Z").to_a
+prompt.enum_select("Choose your letter?", letters, page_size: 4)
+# =>
+# Which letter?
+#   1) A
+#   2) B
+#   3) C
+#   4) D
+#   Choose 1-26 [1]:
+# (Press tab/right or left to reveal more choices)
+```
+
+#### `:disabled`
+
+To make a choice unavailable use the `:disabled` option and, if you wish, provide a reason:
+
+choices = [
+  {name: "Emacs", disabled: "(not installed)"},
+  "Atom",
+  "GNU nano",
+  {name: "Notepad++", disabled: "(not installed)"},
+  "Sublime",
+  "Vim"
+]
+
+The disabled choice will be displayed with a cross `✘` character next to it and followed by an explanation:
+
+```crystal
+prompt.enum_select("Select an editor", choices)
+# =>
+# Select an editor
+# ✘ 1) Emacs (not installed)
+#   2) Atom
+#   3) GNU nano
+# ✘ 4) Notepad++ (not installed)
+#   5) Sublime
+#   6) Vim
+#   Choose 1-6 [2]:
+```
+
+### `#slider`
+
+If you have constrained range of numbers for user to choose from you may consider using a `slider`.
+
+The slider provides easy visual way of picking a value marked with the `●` symbol. You can set `:min` (defaults to 0), `:max`, and `:step` (defaults to 1) options to configure slider range:
+
+```crystal
+prompt.slider("Volume", max: 100, step: 5)
+# =>
+# Volume ──────────●────────── 50
+# (Use arrow keys, press Enter to select)
+```
+
+You can also change the default slider formatting using the `:format`. The value must contain the `:slider` token to show current value and any `sprintf` compatible flag for number display, in our case `%d`:
+
+```crystal
+prompt.slider("Volume", max: 100, step: 5, default: 75, format: "|:slider| %d%%")
+# =>
+# Volume |───────────────●──────| 75%
+# (Use arrow keys, press Enter to select)
+```
+
+As of now only whole numbers are supported.
+
+If you wish to change the slider handle and the slider range display use `:symbols` option:
+
+```crystal
+prompt.slider("Volume", max: 100, step: 5, default: 75, symbols: {bullet: "x", line: "_"})
+# =>
+# Volume _______________x______ 75%
+# (Use arrow keys, press Enter to select)
+```
+
+Slider can be configured through a DSL as well:
+
+```crystal
+prompt.slider("What size?") do |range|
+  range.max 100
+  range.step 5
+  range.default 75
+  range.format "|:slider| %d%"
+end
+# =>
+# Volume |───────────────●──────| 75%
+# (Use arrow keys, press Enter to select)
+```
+
+### `#say`
+
+To simply print message out to standard output use `say` like so:
+
+```crystal
+prompt.say(...)
+```
+
+The `say` method also accepts option `:color` which supports all the colors provided by [Cor](https://github.com/watzon/cor), as well as a Cor object itself, or an `{R, G, B}` tuple.
+
+`Term::Prompt` provides more specific versions of `say` method to better express intention behind the message such as `ok`, `warn`, and `error`.
+
+#### `#ok`
+
+To print message(s) in green do:
+
+```crystal
+prompt.ok(...)
+```
+
+#### `#warn`
+
+To print message(s) in yellow do:
+
+```crystal
+prompt.warn(...)
+```
+
+#### `#error`
+
+To print message(s) in red do:
+
+```crystal
+prompt.error(...)
+```
+
+## Settings
+
+### `:symbols`
+
+Many prompts use symbols to display information. You can overwrite the default symbols for all the prompts using the `:symbols` key and hash of symbol names as value:
+
+```crystal
+prompt = Term::Prompt.new(symbols: { marker: ">" })
+```
+
+The following symbols can be overwritten:
+
+
+| Symbols     | Unicode | ASCII |
+| ----------- |:-------:|:-----:|
+|  tick       | `✓`     | `√`   |
+|  cross      | `✘`     | `x`   |
+|  marker     | `‣`     | `>`   |
+|  dot        | `•`     | `.`   |
+|  bullet     | `●`     | `O`   |
+|  line       | `─`     | `-`   |
+|  radio_on   | `⬢`     | `(*)` |
+|  radio_off  | `⬡`     | `( )` |
+|  arrow_up   | `↑`     | `↑`   |
+|  arrow_down | `↓`     | `↓`   |
+|  arrow_left | `←`     | `←`   |
+|  arrow_right| `→`     | `→`   |
+
+### `:palette`
+
+Colors are fetched from a `Palette` object, which contains 4 different colors. Their names and defaults are as follows:
+
+- `enabled` - `:dark_grey`
+- `active` - `:green`
+- `help` - `:dim_grey`
+- `error` - `:red`
+- `warning` - `:yellow`
+
+You can provide your own palette object to change the colors. For example, to change the active color to pink:
+
+```crystal
+palette = Term::Prompt::Palette.new(active: :pink)
+prompt = Term::Prompt.new(palette: palette)
+```
+
+### `:interrupt`
+
+By default `InputInterrupt` error will be raised when the user hits the interrupt key (Control-C). However, you can customize this behaviour by passing the `:interrupt` option. The available options are:
+
+    :signal - sends interrupt signal
+    :exit - exists with status code
+    :noop - skips handler
+
+For example, to send interrupt signal do:
+
+```crystal
+prompt = Term::Prompt.new(interrupt: :signal)
+```
+
+### `:prefix`
+
+You can prefix each question asked using the `:prefix` option. This option can be applied either globally for all prompts or individual for each one:
+
+```crystal
+prompt = Term::Prompt.new(prefix: "[?] ")
+```
 
 ## Contributing
 
