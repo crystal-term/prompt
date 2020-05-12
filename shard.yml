@@ -1,8 +1,25 @@
-name: prompt
+name: term-prompt
 version: 0.1.0
 
 authors:
   - Chris Watson <cawatson1993@gmail.com>
+
+dependencies:
+  term-cursor:
+    # path: ../cursor
+    github: crystal-term/cursor
+    branch: master
+  term-reader:
+    # path: ../reader
+    github: crystal-term/reader
+    branch: master
+  term-screen:
+    # path: ../screen
+    github: crystal-term/screen
+    branch: master
+  cor:
+    github: watzon/cor
+    branch: master
 
 crystal: 0.34.0
 

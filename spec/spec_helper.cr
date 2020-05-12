@@ -1,2 +1,2 @@
 require "spec"
-require "../src/prompt"
+require "../src/term-prompt"
