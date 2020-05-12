@@ -861,6 +861,7 @@ prompt.enum_select("Choose your letter?", letters, page_size: 4)
 
 To make a choice unavailable use the `:disabled` option and, if you wish, provide a reason:
 
+```crystal
 choices = [
   {name: "Emacs", disabled: "(not installed)"},
   "Atom",
@@ -869,6 +870,7 @@ choices = [
   "Sublime",
   "Vim"
 ]
+```
 
 The disabled choice will be displayed with a cross `✘` character next to it and followed by an explanation:
 
