@@ -40,7 +40,12 @@ module Term
 
         @prefix       = options[:prefix]? || @prompt.prefix
         @separator    = options[:separator]? || nil
-        @default      = options.fetch(:default) { [] of Int32 }
+
+        @default      = [] of Int32
+        if default = options[:default]?
+          @default << default
+        end
+
         @choices      = Choices.new
         @palette      = options[:palette]? || @prompt.palette
         @cycle        = options[:cycle]? || false
@@ -125,18 +130,19 @@ module Term
       end
 
       # Add a single choice
-      def choice(value)
-        choices(value)
+      def choice(*args, **kwargs)
+        @choices << Choice.new(*args, **kwargs)
       end
 
       # Add choices
       def choices(*values)
         @filter_cache = {} of String => Array(Choice)
         values.each do |value|
-          if value.is_a?(Array)
-            value.each { |v| @choices << v }
+          case value
+          when Array
+            value.each { |v| @choices << Choice.from(v) }
           else
-            @choices << value
+            @choices << Choice.from(value)
           end
         end
       end
