@@ -67,15 +67,13 @@ module Term
         @default
       end
 
-      {% begin %}
-        # Call the question.
-        def call(message = "", &block : {{ @type.id }} ->)
-          @done = false
-          @question = message
-          block.call(self)
-          render
-        end
-      {% end %}
+      # Call the question.
+      def call(message = "", &block : Question ->)
+        @done = false
+        @question = message
+        block.call(self)
+        render
+      end
 
       # ditto
       def call(message = "")

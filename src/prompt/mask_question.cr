@@ -12,6 +12,14 @@ module Term
         Term::Reader.subscribe(:keypress, :return, :enter)
       end
 
+      # Call the question.
+      def call(message = "", &block : MaskQuestion ->)
+        @done = false
+        @question = message
+        block.call(self)
+        render
+      end
+
       def keyreturn
         @done_masked = true
       end
