@@ -41,14 +41,9 @@ module Term
       end
 
       # Pluck a choice by its name from collection
-      # def pluck(name)
-      #   map { |choice| choice.public_send(name) }
-      # end
-
-      # Find a matching choice
-      # def find_by(attr, value)
-      #   find { |choice| choice.public_send(attr) == value }
-      # end
+      def pluck(name)
+        @choices.select { |choice| choice.name == name }
+      end
     end
   end
 end

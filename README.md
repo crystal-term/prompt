@@ -210,7 +210,7 @@ By default any key is accepted but you can limit keys by using `:keys` option. A
 prompt.keypress("Press space or enter to continue", keys: [:space, :return])
 ```
 
-### `multiline`
+### `#multiline`
 
 Asking for multiline input can be done with the `multiline` method. The reading will terminate with the pressing of <kbd>Ctrl</kbd> + <kbd>d</kbd> or <kbd>Ctrl</kbd> + <kbd>z</kbd>. Empty lines will not be included in the returned input.
 
@@ -913,6 +913,81 @@ prompt.enum_select("Select an editor", choices)
 #   5) Sublime
 #   6) Vim
 #   Choose 1-6 [2]:
+```
+
+### `#expand`
+
+The `expand` method provides a compact way to ask a question with many options.
+
+The first argument to expand is the message to display, and the second is a list of choices. As opposed to `select`, `multi_select`, and `enum_select`, the choices need to be NamedTuples which include the `key`, `name`, and `value` keys (all strings). The key must be a single character. The help choice is added automatically as the last option under the <kbd>h</kbd> key.
+
+```crystal
+choices = [
+  {
+    key: "y",
+    name: "overwrite this file",
+    value: "yes"
+  }, {
+    key: "n",
+    name: "do not overwrite this file",
+    value: "no"
+  }, {
+    key: "q",
+    name: "quit; do not overwrite this file ",
+    value: "quit"
+  }
+]
+```
+
+The choices can also be provided through the DSL using the `choice` method:
+
+```crystal
+prompt.expand("Overwrite shard.yml?") do |q|
+  q.choice key: "y", name: "Overwrite"      value: "ok"
+  q.choice key: "n", name: "Skip",          value: "no"
+  q.choice key: "a", name: "Overwrite all", value: "all"
+  q.choice key: "d", name: "Show diff",     value: "diff"
+  q.choice key: "q", name: "Quit",          value: "quit"
+end
+```
+
+The first element in the array of choices or provided via the choice DSL will be the default choice, you can change that by passing default option.
+
+```crystal
+prompt.expand('Overwrite shard.yml?', choices, default: 1)
+# =>
+# Overwrite shard.yml? (enter "h" for help) [y,n,q,h]
+```
+
+Each time user types an option a hint will be displayed:
+
+```crystal
+# Overwrite shard.yml? (enter "h" for help) [y,n,a,d,q,h] y
+# >> overwrite this file
+```
+
+If user types h and presses enter, an expanded view will be shown which further allows to refine the choice:
+
+```crystal
+# Overwrite shard.yml?
+#   y - overwrite this file
+#   n - do not overwrite this file
+#   q - quit; do not overwrite this file
+#   h - print help
+#   Choice [y]:
+```
+
+Run `examples/expand.cr` to see the prompt in action.
+
+#### `:auto_hint`
+
+To show hint by default use te `:auto_hint` option:
+
+```crystal
+prompt.expand('Overwrite Gemfile?', choices, auto_hint: true)
+# =>
+# Overwrite shard.yml? (enter "h" for help) [y,n,q,h]
+# >> overwrite this file
 ```
 
 ### `#slider`

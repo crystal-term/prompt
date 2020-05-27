@@ -97,6 +97,17 @@ module Term
       question.call(message, &block)
     end
 
+    # ditto
+    def keypress(message = "", **options)
+      keypress(message, **options) { }
+    end
+
+    # Ask a question with a multiline answer
+    #
+    # Example:
+    # ```
+    # prompt.multiline("Description?")
+    # ```
     def multiline(message = "", **options, &block : Multiline ->)
       question = Multiline.new(self, **options)
       question.call(message, &block)
@@ -105,11 +116,6 @@ module Term
     # ditto
     def multiline(message = "", **options)
       multiline(message, **options) { }
-    end
-
-    # ditto
-    def keypress(message = "", **options)
-      keypress(message, **options) { }
     end
 
     # Ask a masked question. Masked questions replace each input character
@@ -166,13 +172,42 @@ module Term
     # Example:
     # ```
     # prompt.collect do
-    #   key(:name).ask('Name?')
-    #   key(:age).ask('Age?')
+    #   key(:name).ask("Name?")
+    #   key(:age).ask("Age?")
     # end
     # ```
     def collect(**options, &block : AnswersCollector ->)
       collector = AnswersCollector.new(self, **options)
       collector.call(&block)
+    end
+
+    # Expand available options
+    #
+    # Example:
+    # ```
+    # prompt = Term::Prompt.new
+    #
+    # choices = [{
+    #   key: "Y",
+    #   name: "Overwrite",
+    #   value: :yes
+    # }, {
+    #   key: "n",
+    #   name: "Skip",
+    #   value: :no
+    # }]
+    #
+    # prompt.expand("Overwrite shard.yml?", choices)
+    # ```
+    def expand(question, choices = nil, **options, &block : Expander ->)
+      choices = choices.nil? ? [] of Choice : choices
+      list = Expander.new(self, **options)
+      list.call(question, choices, &block)
+    end
+
+    # ditto
+    def expand(question, choices = nil, **options)
+      expand(question, choices, **options) { }
     end
 
     # Ask a question with a range slider
