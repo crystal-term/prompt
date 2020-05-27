@@ -204,10 +204,38 @@ prompt.keypress("Press any key")
 # => a
 ```
 
-By default any key is accepted but you can limit keys by using `:keys` option. Any key event names such as `:space` or `:ctrl_k` are valid:
+By default any key is accepted but you can limit keys by using `:keys` option. Any key event names such as <kbd>Space</kbd> or <kbd>Ctrl</kbd> + <kbd>k</kbd> are valid:
 
 ```crystal
 prompt.keypress("Press space or enter to continue", keys: [:space, :return])
+```
+
+### `multiline`
+
+Asking for multiline input can be done with the `multiline` method. The reading will terminate with the pressing of <kbd>Ctrl</kbd> + <kbd>d</kbd> or <kbd>Ctrl</kbd> + <kbd>z</kbd>. Empty lines will not be included in the returned input.
+
+```crystal
+prompt.multiline("Description?")
+# Description? (Press CTRL-D or CTRL-Z to finish)
+# I know not all that may be coming,
+# but be it what it will,
+# I'll go to it laughing.
+# => "I know not all that may be coming,\n"but be it what it will,\nI'll go to it laughing.\n"
+```
+
+The `multiline` uses similar options to those supported by `ask` prompt. For example, to provide default description:
+
+```crystal
+prompt.multiline("Description?", default: "A super sweet prompt.")
+```
+
+Or, using the DSL:
+
+```crystal
+prompt.multiline("Description?") do |q|
+  q.default = "A super sweet prompt."
+  q.help = "Press thy ctrl+d to end"
+end
 ```
 
 ### `#mask`

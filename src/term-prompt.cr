@@ -97,6 +97,16 @@ module Term
       question.call(message, &block)
     end
 
+    def multiline(message = "", **options, &block : Multiline ->)
+      question = Multiline.new(self, **options)
+      question.call(message, &block)
+    end
+
+    # ditto
+    def multiline(message = "", **options)
+      multiline(message, **options) { }
+    end
+
     # ditto
     def keypress(message = "", **options)
       keypress(message, **options) { }

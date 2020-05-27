@@ -68,7 +68,7 @@ module Term
       end
 
       # Call the question.
-      def call(message = "", &block : Question ->)
+      def call(message = "", &block : self ->)
         @done = false
         @question = message
         block.call(self)
