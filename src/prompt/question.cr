@@ -104,7 +104,7 @@ module Term
 
           question =  render_question
           input_line = question + result.value.to_s
-          total_lines = @prompt.count_screen_lines(input_line)
+          total_lines = @prompt.count_screen_lines(input_line, Term::Screen.width)
           @prompt.print(refresh(question.lines.size, total_lines))
         end
 
@@ -141,9 +141,9 @@ module Term
       def read_input(question)
         if value = @value
           @first_render = false
-          @prompt.read_line(question, echo: @echo, value: value).chomp
+          @prompt.read_line(prompt: question, echo: @echo, value: value).chomp
         else
-          @prompt.read_line(question, echo: @echo).chomp
+          @prompt.read_line(prompt: question, echo: @echo).chomp
         end
       end
 
