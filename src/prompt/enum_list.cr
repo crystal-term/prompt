@@ -208,7 +208,7 @@ module Term
       # Count how many screen lines the question spans
       def question_lines_count(question_lines)
         question_lines.reduce(0) do |acc, line|
-          acc + @prompt.count_screen_lines(line)
+          acc + @prompt.count_screen_lines(line, Term::Screen.width)
         end
       end
 

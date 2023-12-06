@@ -66,7 +66,7 @@ module Term
         until @done_masked
           @prompt.read_keypress
           question = render_question
-          total_lines = @prompt.count_screen_lines(question)
+          total_lines = @prompt.count_screen_lines(question, Term::Screen.width)
           @prompt.print(@prompt.clear_lines(total_lines))
           @prompt.print(render_question)
         end
