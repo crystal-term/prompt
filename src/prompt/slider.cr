@@ -17,7 +17,7 @@ module Term
       @active : Int32
       @question : String?
 
-      # Initailize a Slider
+      # Initialize a Slider
       def initialize(@prompt : Term::Prompt, **options)
         @prefix       = options[:prefix]? || @prompt.prefix
         @min          = options[:min]? || 0
