@@ -167,7 +167,7 @@ module Term
       no?(message, **options) { }
     end
 
-    # Gathers more than one aswer
+    # Gathers more than one answer
     #
     # Example:
     # ```
