@@ -245,7 +245,8 @@ module Term
 
       # Refresh the current input
       private def refresh(lines)
-        if (@hint && (!@selected || @done)) || (@auto_hint && collapsed?)
+        if @hint && !@auto_hint && (!@selected || @done)
+          # Clear hint only when NOT using auto_hint and certain conditions are met
           @hint = nil
           @prompt.clear_lines(lines, :down) +
             @prompt.cursor.prev_line

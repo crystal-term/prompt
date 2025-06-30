@@ -26,12 +26,16 @@ module Term
       end
 
       # Callback fired when enter/return key is pressed
-      def keyenter
-        if @min
-          super if @selected.size >= @min
+      def keyreturn
+        if min = @min
+          super if @selected.size >= min
         else
           super
         end
+      end
+
+      def keyenter
+        keyreturn
       end
 
       # Callback fired when space key is pressed

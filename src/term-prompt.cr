@@ -38,19 +38,19 @@ module Term
 
     delegate :clear_lines, :clear_line, :show, :hide, to: @cursor
     delegate :read_char, :read_keypress, :read_line,
-             :read_multiline, :trigger,
-             :count_screen_lines, to: @reader
+      :read_multiline, :trigger,
+      :count_screen_lines, to: @reader
     delegate :print, :puts, :flush, to: @output
 
     def initialize(**options)
-      @input          = options[:input]? || STDIN
-      @output         = options[:output]? || STDOUT
-      @env            = options[:env]? || ENV.to_h
-      @prefix         = options[:prefix]? || ""
-      @palette        = options[:palette]? || Palette.new
-      @interrupt      = options[:interrupt]? || :error
-      @track_history  = options[:track_history]? || true
-      @symbols        = Symbols.symbols.merge(options[:symbols]? || {} of Symbol => String)
+      @input = options[:input]? || STDIN
+      @output = options[:output]? || STDOUT
+      @env = options[:env]? || ENV.to_h
+      @prefix = options[:prefix]? || ""
+      @palette = options[:palette]? || Palette.new
+      @interrupt = options[:interrupt]? || :error
+      @track_history = options[:track_history]? || true
+      @symbols = Symbols.symbols.merge(options[:symbols]? || {} of Symbol => String)
 
       @cursor = Term::Cursor
       @reader = Term::Reader.new(
@@ -167,6 +167,23 @@ module Term
       no?(message, **options) { }
     end
 
+    # Ask for enhanced confirmation, especially for destructive operations
+    #
+    # Example:
+    # ```
+    # prompt.confirm("Delete all files?", destructive: true)
+    # prompt.confirm("Deploy to production?", double_confirm: true)
+    # ```
+    def confirm(message = "", **options, &block : EnhancedConfirm ->)
+      question = EnhancedConfirm.new(self, **options)
+      question.call(message, &block)
+    end
+
+    # ditto
+    def confirm(message = "", **options)
+      confirm(message, **options) { }
+    end
+
     # Gathers more than one answer
     #
     # Example:
@@ -188,13 +205,13 @@ module Term
     # prompt = Term::Prompt.new
     #
     # choices = [{
-    #   key: "Y",
-    #   name: "Overwrite",
-    #   value: :yes
+    #   key:   "Y",
+    #   name:  "Overwrite",
+    #   value: :yes,
     # }, {
-    #   key: "n",
-    #   name: "Skip",
-    #   value: :no
+    #   key:   "n",
+    #   name:  "Skip",
+    #   value: :no,
     # }]
     #
     # prompt.expand("Overwrite shard.yml?", choices)
@@ -296,6 +313,76 @@ module Term
       self.multi_select(question, choices, **options) { }
     end
 
+    # Ask a question with autocomplete suggestions
+    #
+    # Example:
+    # ```
+    # frameworks = %w(Rails Django Flask Laravel Express React Vue Angular)
+    # prompt.autocomplete("Choose a framework:", frameworks)
+    # ```
+    def autocomplete(question, choices = nil, **options, &block : Autocomplete ->)
+      choices = choices.nil? ? [] of Choice : choices
+      autocompleter = Autocomplete.new(self, **options)
+      autocompleter.call(question, choices, &block)
+    end
+
+    # ditto
+    def autocomplete(question, choices = nil, **options)
+      autocomplete(question, choices, **options) { }
+    end
+
+    # Ask user to select a file
+    #
+    # Example:
+    # ```
+    # prompt.file_select("Choose a file:")
+    # # or with filters
+    # prompt.file_select("Choose a Ruby file:", filter: [".rb", ".crystal"])
+    # ```
+    def file_select(question, **options, &block : FileSelect ->)
+      merged_options = options.merge({file_only: true})
+      file_picker = FileSelect.new(self, **merged_options)
+      file_picker.call(question, &block)
+    end
+
+    # ditto
+    def file_select(question, **options)
+      file_select(question, **options) { }
+    end
+
+    # Ask user to select a directory
+    #
+    # Example:
+    # ```
+    # prompt.directory_select("Choose a directory:")
+    # ```
+    def directory_select(question, **options, &block : FileSelect ->)
+      merged_options = options.merge({dir_only: true})
+      file_picker = FileSelect.new(self, **merged_options)
+      file_picker.call(question, &block)
+    end
+
+    # ditto
+    def directory_select(question, **options)
+      directory_select(question, **options) { }
+    end
+
+    # Ask user to select a file or directory
+    #
+    # Example:
+    # ```
+    # prompt.path_select("Choose a path:")
+    # ```
+    def path_select(question, **options, &block : FileSelect ->)
+      file_picker = FileSelect.new(self, **options)
+      file_picker.call(question, &block)
+    end
+
+    # ditto
+    def path_select(question, **options)
+      path_select(question, **options) { }
+    end
+
     # Print statement(s) out using the palette active color.
     def ok(*args, **options)
       args.each { |message| say(message, color: @palette.active) }
@@ -340,7 +427,7 @@ module Term
       print cursor.restore
     end
 
-    # Decorare the provided `message` using the given `color`. Color can be
+    # Decorate the provided `message` using the given `color`. Color can be
     # a symbol, a `Cor` instance, or an `{R, G, B}` tuple.
     def decorate(message, color = @enabled_color)
       Cor.truecolor_string(message, fore: color)

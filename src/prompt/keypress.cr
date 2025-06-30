@@ -30,7 +30,11 @@ module Term
 
       def process_input(question)
         @prompt.print(render_question)
-        until @done; @input = @prompt.read_keypress; end
+        # If ctrl_c is in the allowed keys, use :noop to prevent interrupt
+        interrupt = @keys.includes?("ctrl_c") ? :noop : nil
+        until @done
+          @input = @prompt.reader.read_keypress(interrupt: interrupt)
+        end
         Result.new(self, @input.to_s).process
       end
 

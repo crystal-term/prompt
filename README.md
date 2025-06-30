@@ -14,11 +14,15 @@
 
 ## Features
 
-- Number of prompt types for gathering user input
+- Rich variety of prompt types for gathering user input
+- Real-time autocompletion with filtering
+- File and directory browser with navigation
+- Enhanced confirmation prompts for destructive operations
 - A robust API for validating complex inputs
 - User friendly error feedback
 - Intuitive DSL for creating complex menus
 - Ability to page long menus
+- Dynamic filtering for select and multi-select prompts
 
 ## Installation
 
@@ -99,6 +103,70 @@ prompt.enum_select("Select an editor?", choices)
 #   2) nano
 #   3) vim
 #   Choose 1-3 [1]:
+```
+
+For real-time autocompletion suggestions, use `autocomplete`:
+
+```crystal
+countries = ["United States", "United Kingdom", "Canada", "Australia", "Germany", "France", "Japan"]
+prompt.autocomplete("Select your country:", countries)
+# =>
+# Select your country: un
+# ‣ United States
+#   United Kingdom
+```
+
+To browse and select files or directories, use `file_select`, `directory_select`, or `path_select`:
+
+```crystal
+# Select a file
+file = prompt.file_select("Choose a file to edit:")
+# =>
+# Choose a file to edit: (↑/↓ to navigate, Enter to select, ← to go up, → to enter directory)
+# Path: /home/user/project
+# 
+#   📁 ..
+#   📁 src/
+#   📁 spec/
+# ‣ 📄 README.md
+#   📄 shard.yml
+
+# Select only Crystal files
+crystal_file = prompt.file_select("Choose a Crystal file:", 
+  filter: [".cr"],
+  start_path: "src/")
+
+# Select a directory
+dir = prompt.directory_select("Choose a project directory:")
+
+# Select either file or directory
+path = prompt.path_select("Choose any path:", show_hidden: true)
+```
+
+For enhanced confirmations with destructive operations, use `confirm`:
+
+```crystal
+# Simple confirmation
+result = prompt.confirm("Continue with operation?")
+
+# Destructive operation confirmation (requires exact match)
+result = prompt.confirm("Delete all files?", 
+  destructive: true,
+  warning: "This will permanently delete 1,234 files!")
+# =>
+# Delete all files? (Type 'yes' to confirm destructive action)
+# ⚠️  This will permanently delete 1,234 files!
+# Type 'yes' to confirm: 
+
+# Double confirmation
+result = prompt.confirm("Deploy to production?", 
+  double_confirm: true)
+# =>
+# Deploy to production? (Type 'yes' twice to confirm)
+# Type 'yes' to confirm: yes
+# First confirmation received. Please confirm again:
+# Type 'yes' to confirm: yes
+# ✓ Confirmed
 ```
 
 If you wish to collect more than one answer use collect:
@@ -1035,6 +1103,136 @@ end
 # =>
 # Volume |───────────────●──────| 75%
 # (Use arrow keys, press Enter to select)
+```
+
+### `#autocomplete`
+
+For real-time autocompletion with filtering, use the `autocomplete` method. As the user types, the list of choices is filtered dynamically:
+
+```crystal
+countries = ["United States", "United Kingdom", "Canada", "Australia", "Germany", "France", "Japan", "China", "Brazil", "Mexico"]
+country = prompt.autocomplete("Select your country:", countries)
+# =>
+# Select your country: un
+# ‣ United States
+#   United Kingdom
+```
+
+You can also customize the behavior with various options:
+
+```crystal
+prompt.autocomplete("Select your country:", countries) do |ac|
+  ac.page_size = 5                          # Show 5 items per page
+  ac.symbols = {marker: "►"}                # Custom marker symbol
+  ac.help = "(Type to filter, Tab to complete)"  # Custom help text
+  ac.cycle = true                           # Enable cycling through options
+end
+```
+
+### `#file_select`
+
+To browse and select files from the filesystem, use `file_select`:
+
+```crystal
+file = prompt.file_select("Choose a file to edit:")
+# =>
+# Choose a file to edit: (↑/↓ to navigate, Enter to select, ← to go up, → to enter directory)
+# Path: /home/user/project
+# 
+#   📁 ..
+#   📁 src/
+#   📁 spec/
+# ‣ 📄 README.md
+#   📄 shard.yml
+```
+
+#### Options
+
+- `:start_path` - Starting directory (defaults to current directory)
+- `:filter` - Array of file extensions to show (e.g., `[".cr", ".yml"]`)
+- `:show_hidden` - Show hidden files (defaults to false)
+- `:help` - Custom help text
+
+```crystal
+# Show only Crystal files in src directory
+crystal_file = prompt.file_select("Choose a Crystal file:", 
+  start_path: "src/",
+  filter: [".cr"],
+  help: "(Navigate with arrows, Enter to select)")
+```
+
+### `#directory_select`
+
+Similar to `file_select` but only allows selecting directories:
+
+```crystal
+dir = prompt.directory_select("Choose a project directory:")
+# =>
+# Choose a project directory: (↑/↓ to navigate, Enter to select, ← to go up, → to enter directory)
+# Path: /home/user
+# 
+#   📁 ..
+# ‣ 📁 projects/
+#   📁 documents/
+#   📁 downloads/
+```
+
+### `#path_select`
+
+Allows selecting either files or directories:
+
+```crystal
+path = prompt.path_select("Choose any path:", 
+  show_hidden: true,
+  start_path: ENV["HOME"])
+```
+
+### `#confirm`
+
+For enhanced confirmation prompts with support for destructive operations:
+
+```crystal
+# Simple confirmation (yes/no)
+result = prompt.confirm("Continue with operation?")
+# => Continue with operation? (y/N)
+```
+
+#### Enhanced options
+
+```crystal
+# Destructive operation - requires typing "yes"
+result = prompt.confirm("Delete all files?", 
+  destructive: true,
+  warning: "This will permanently delete 1,234 files!")
+# =>
+# Delete all files? (Type 'yes' to confirm destructive action)
+# ⚠️  This will permanently delete 1,234 files!
+# Type 'yes' to confirm: 
+
+# Double confirmation
+result = prompt.confirm("Deploy to production?", 
+  double_confirm: true)
+# =>
+# Deploy to production? (Type 'yes' twice to confirm)
+# Type 'yes' to confirm: yes
+# First confirmation received. Please confirm again:
+# Type 'yes' to confirm: yes
+# ✓ Confirmed
+
+# Custom confirmation word
+result = prompt.confirm("Reset database?", 
+  require_exact: true,
+  confirmation_word: "RESET")
+# =>
+# Reset database? (Type 'RESET' to confirm)
+# Type 'RESET' to confirm: 
+
+# Combine options
+result = prompt.confirm("Format hard drive?",
+  destructive: true,
+  double_confirm: true,
+  warning: "All data will be lost!",
+  confirmation_word: "FORMAT")
 ```
 
 ### `#say`

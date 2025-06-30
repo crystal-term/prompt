@@ -1,5 +1,11 @@
 require "../src/term-prompt"
 
+# With auto_hint: true, the expand prompt will:
+# - Always show a hint when collapsed (even before typing)
+# - Show the default choice hint initially
+# - Update the hint as you type valid keys
+# - Show "invalid option" for invalid keys
+
 choices = [{
   key: "y",
   name: "overwrite this file",

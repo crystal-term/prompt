@@ -108,7 +108,16 @@ module Term
           @prompt.print(refresh(question.lines.size, total_lines))
         end
 
-        @prompt.print(render_question)
+        # Print the final question with colored answer
+        # This replaces the last line to show the answer in green
+        if echo? && @done
+          # Move cursor up one line and clear it, then print with colored answer
+          @prompt.print(@prompt.cursor.up + @prompt.cursor.clear_line)
+          @prompt.print(render_question)
+        elsif !echo?
+          # When echo is disabled, always print the final question
+          @prompt.print(render_question)
+        end
         convert_result(result.not_nil!.value)
       end
 

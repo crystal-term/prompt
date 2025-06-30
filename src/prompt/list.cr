@@ -62,7 +62,7 @@ module Term
         @by_page      = false
         @paging_changed = false
 
-        Term::Reader.subscribe(:keypress, :return, :up, :down, :left, :right)
+        Term::Reader.subscribe(:keypress, :return, :up, :down, :left, :right, :backspace, :delete)
       end
 
       # Set default option selected
@@ -265,13 +265,13 @@ module Term
       end
 
       def keypress(key, event)
-        if filterable? && key =~ FILTER_KEYS_MATCHER
-          @filter.not_nil! << key.not_nil!
+        if filterable? && event.value =~ FILTER_KEYS_MATCHER
+          @filter.not_nil! << event.value.not_nil!
           @active = 1
         end
 
-        if key.to_s.match(/\d/)
-          keynum(key.to_s)
+        if event.value.to_s.match(/\d/)
+          keynum(event.value.to_s)
         end
       end
 
