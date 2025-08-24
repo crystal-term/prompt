@@ -9,7 +9,7 @@ description: Interactive command line prompts
 dependencies:
   cor:
     github: watzon/cor
-    version: ~> 0.1.0
+    branch: master
   term-cursor:
     github: crystal-term/cursor
     branch: master
