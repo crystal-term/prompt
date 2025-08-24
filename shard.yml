@@ -1,2 +1,23 @@
 name: term-prompt
-version: 0.3.1
+version: 0.2.0
+
+authors:
+  - Chris Watson <cawatson1993@gmail.com>
+
+dependencies:
+  term-cursor:
+    github: crystal-term/cursor
+    branch: master
+  term-reader:
+    github: crystal-term/reader
+    branch: master
+  term-screen:
+    github: crystal-term/screen
+    branch: master
+  cor:
+    github: watzon/cor
+    branch: master
+
+crystal: ">= 1.0.0"
+
+license: MIT
