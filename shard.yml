@@ -1,2 +1,26 @@
 name: term-prompt
-version: 0.3.0
+version: 0.2.0
+
+authors:
+  - Chris Watson <cawatson1993@gmail.com>
+
+description: Interactive command line prompts
+
+dependencies:
+  term-cursor:
+    github: crystal-term/cursor
+    branch: master
+  term-reader:
+    github: crystal-term/reader
+    branch: master
+  term-screen:
+    github: crystal-term/screen
+    branch: master
+
+development_dependencies:
+  spectator:
+    gitlab: arctic-fox/spectator
+
+crystal: ">= 1.0.0"
+
+license: MIT
