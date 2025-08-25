@@ -1,5 +1,5 @@
 name: term-prompt
-version: 0.3.0
+version: 0.2.0
 
 authors:
   - Chris Watson <cawatson1993@gmail.com>
@@ -12,13 +12,13 @@ dependencies:
     branch: master
   term-cursor:
     github: crystal-term/cursor
-    version: 0.3.0
+    branch: master
   term-reader:
     github: crystal-term/reader
-    version: 0.3.0
+    branch: master
   term-screen:
     github: crystal-term/screen
-    version: 0.3.0
+    branch: master
 
 development_dependencies:
   spectator:
