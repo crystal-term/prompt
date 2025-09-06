@@ -2,23 +2,23 @@ name: term-prompt
 version: 0.3.0
 
 authors:
-  - Chris Watson <cawatson1993@gmail.com>
+  - Chris Watson <chris@watzon.tech>
 
 description: Interactive command line prompts
 
 dependencies:
-  cor:
-    github: watzon/cor
-    branch: master
+  term-color:
+    github: crystal-term/color
+    version: ~> 0.4.0
   term-cursor:
     github: crystal-term/cursor
-    branch: master
+    version: ~> 0.3.0
   term-reader:
     github: crystal-term/reader
-    branch: master
+    version: ~> 0.3.1
   term-screen:
     github: crystal-term/screen
-    branch: master
+    version: ~> 0.3.0
 
 development_dependencies:
   spectator:

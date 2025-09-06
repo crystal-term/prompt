@@ -6,9 +6,9 @@
 
 ![spec status](https://github.com/crystal-term/prompt/workflows/specs/badge.svg)
 
-> A terminal prompt for tasks that have non-deterministic time frame.
+> Powerful interactive terminal prompts for Crystal.
 
-**Term::Screen** provides an independent prompt component for crystal-term.
+**Term::Prompt** provides an independent prompt component for crystal-term.
 
 [![asciicast](https://asciinema.org/a/acKxSZcBD3I8BUlDBHtw02qtJ.svg)](https://asciinema.org/a/acKxSZcBD3I8BUlDBHtw02qtJ)
 
@@ -308,7 +308,7 @@ end
 
 ### `#mask`
 
-f you require input of confidential information use `mask` method. By default each character that is printed is replaced by a `•` symbol. All configuration options applicable to `#ask` method can be used with `mask` as well.
+If you require input of confidential information use `mask` method. By default each character that is printed is replaced by a `•` symbol. All configuration options applicable to `#ask` method can be used with `mask` as well.
 
 ```crystal
 prompt.mask("What is your secret?")
@@ -334,9 +334,9 @@ prompt.mask("What is your secret?", echo: false)
 In order to display a query asking for boolean input from user use yes? like so:
 
 ```crystal
-prompt.yes?("Do you like Ruby?")
+prompt.yes?("Do you like Crystal?")
 # =>
-# Do you like Ruby? (Y/n)
+# Do you like Crystal? (Y/n)
 ```
 
 You can further customize question by passing `suffix`, `positive`, and `negative` options. The `suffix` changes text of available options, the `positive` changes the display string for successful answer and `negative` changes the display string for a negative answer. The final value is a boolean provided the `convert` option evaluates to boolean.
@@ -656,7 +656,7 @@ prompt.multi_select("Select drinks?", choices)
 As a return value, `multi_select` will always return an array populated with the names of the choices. If you wish to return custom values for the available choices do:
 
 ```crystal
-choices = {vodka: "1", beer: "2", wine: "3", whisky: "4", bourbon: "}
+choices = {vodka: "1", beer: "2", wine: "3", whisky: "4", bourbon: "5"}
 prompt.multi_select("Select drinks?", choices)
 
 # Provided that vodka and beer have been selected, the function will return
@@ -815,22 +815,6 @@ prompt.multi_select("Select drinks?", choices, filter: true)
 #   ⬡ bourbon
 ```
 
-#### `:filter`
-
-To activate dynamic list filtering on letter/number typing, use the `:filter` option:
-
-```crystal
-choices = %w(vodka beer wine whisky bourbon)
-prompt.multi_select("Select drinks?", choices, filter: true)
-# =>
-# Select drinks? (Use ↑/↓ arrow keys, press Space to select and Enter to finish, and letter keys to filter)
-# ‣ ⬡ vodka
-#   ⬡ beer
-#   ⬡ wine
-#   ⬡ whisky
-#   ⬡ bourbon
-```
-
 After the user presses "w":
 
 ```
@@ -857,7 +841,7 @@ prompt.multi_select("Select drinks?", choices, min: 3)
 #   ⬢ vodka
 #   ⬢ beer
 #   ⬡ wine
-#   ⬡ wiskey
+#   ⬡ whisky
 # ‣ ⬡ bourbon
 ```
 
@@ -1049,10 +1033,10 @@ Run `examples/expand.cr` to see the prompt in action.
 
 #### `:auto_hint`
 
-To show hint by default use te `:auto_hint` option:
+To show the hint by default use the `:auto_hint` option:
 
 ```crystal
-prompt.expand('Overwrite Gemfile?', choices, auto_hint: true)
+prompt.expand('Overwrite shard.yml?', choices, auto_hint: true)
 # =>
 # Overwrite shard.yml? (enter "h" for help) [y,n,q,h]
 # >> overwrite this file
@@ -1243,7 +1227,7 @@ To simply print message out to standard output use `say` like so:
 prompt.say(...)
 ```
 
-The `say` method also accepts option `:color` which supports all the colors provided by [Cor](https://github.com/watzon/cor), as well as a Cor object itself, or an `{R, G, B}` tuple.
+The `say` method also accepts option `:color` which supports all the colors provided by [Term::Color](https://github.com/crystal-term/color), as well as a Term::Color object itself, or an `{R, G, B}` tuple.
 
 `Term::Prompt` provides more specific versions of `say` method to better express intention behind the message such as `ok`, `warn`, and `error`.
 
@@ -1340,7 +1324,7 @@ prompt = Term::Prompt.new(prefix: "[?] ")
 
 ## Contributing
 
-1. Fork it (<https://github.com/watzon/prompt/fork>)
+1. Fork it (<https://github.com/crystal-term/prompt/fork>)
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)

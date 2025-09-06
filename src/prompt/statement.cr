@@ -6,12 +6,12 @@ module Term
       getter newline : Bool
 
       # Color used to display statement
-      getter color : Cor?
+      getter color : Term::Color?
 
       # Initialize a Statement
       def initialize(@prompt : Prompt, @newline = true, color = nil)
         if color
-          @color = color.is_a?(Cor) ? color : Cor.color(color)
+          @color = color.is_a?(Term::Color) ? color : Term::Color.color(color)
         end
       end
 

@@ -1,6 +1,6 @@
 require "term-cursor"
 require "term-reader"
-require "cor"
+require "term-color"
 
 require "./prompt/*"
 
@@ -429,7 +429,7 @@ module Term
 
     # Decorate the provided `message` using the given `color`. Color can be
     # a symbol, a `Cor` instance, or an `{R, G, B}` tuple.
-    def decorate(message, color = @enabled_color)
+    def decorate(message, color = @palette.enabled)
       Cor.truecolor_string(message, fore: color)
     end
   end
