@@ -1,10 +1,10 @@
 module Term
   class Prompt
     record Palette,
-      enabled = Cor.color(:dark_grey),
-      active = Cor.color(:green),
-      help = Cor.color(:dim_grey),
-      error = Cor.color(:red),
-      warning = Cor.color(:yellow)
+      enabled = Color.color(:dark_grey),
+      active = Color.color(:green),
+      help = Color.color(:dim_grey),
+      error = Color.color(:red),
+      warning = Color.color(:yellow)
   end
 end
