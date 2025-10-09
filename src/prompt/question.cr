@@ -194,11 +194,11 @@ module Term
       end
 
       def to_s(io)
-        io << @message.to_s
+        io << @question.to_s
       end
 
       def inspect
-        "#<#{self.class.name} @message=#{message}, @input=#{@input}>"
+        "#<#{self.class.name} @question=#{@question}, @input=#{@input}>"
       end
     end
   end
