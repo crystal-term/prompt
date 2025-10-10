@@ -1,9 +1,8 @@
 require "./spec_helper"
 
 describe Term::Prompt do
-  # TODO: Write tests
 
-  it "works" do
-    true.should eq(true)
+  it "has a version Number" do
+    Term::Prompt::VERSION.should match(/\d+\.\d+\.\d+/)
   end
 end
