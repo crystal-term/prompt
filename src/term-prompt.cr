@@ -428,9 +428,9 @@ module Term
     end
 
     # Decorate the provided `message` using the given `color`. Color can be
-    # a symbol, a `Color` instance, or an `{R, G, B}` tuple.
+    # a symbol, a `Term::Color` instance, or an `{R, G, B}` tuple.
     def decorate(message, color = @palette.enabled)
-      Color.truecolor_string(message, fore: color)
+      Term::Color.truecolor_string(message, fore: color)
     end
   end
 end

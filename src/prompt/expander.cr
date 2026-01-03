@@ -203,7 +203,7 @@ module Term
         "\n" + @prompt.decorate(">> ", @palette.active) +
           @hint.to_s +
           @prompt.cursor.prev_line +
-          @prompt.cursor.forward(Color.strip(render_header).size)
+          @prompt.cursor.forward(Term::Color.strip(render_header).size)
       end
 
       # Render question with menu
