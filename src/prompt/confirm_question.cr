@@ -92,7 +92,7 @@ module Term
 
       def convert_result(value)
         positive_word   = Regex.escape(positive.to_s)
-        positive_letter = Regex.escape(positive.to_s[0])
+        positive_letter = Regex.escape(positive.to_s[0].to_s)
         pattern = Regex.new("^#{positive_word}|#{positive_letter}$", Regex::Options::IGNORE_CASE)
         !value.to_s.match(pattern).nil?
       end
