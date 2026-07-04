@@ -29,6 +29,7 @@ module Term
       @filter_cache : Hash(String, Array(Choice))
       @first_render : Bool
       @done : Bool
+      @active : Int32
       @paginator : Paginator
       @block_paginator : BlockPaginator
       @by_page : Bool
@@ -38,28 +39,29 @@ module Term
       def initialize(@prompt : Term::Prompt, **options)
         check_options_consistency(options)
 
-        @prefix       = options[:prefix]? || @prompt.prefix
-        @separator    = options[:separator]? || nil
+        @prefix = options[:prefix]? || @prompt.prefix
+        @separator = options[:separator]? || nil
 
-        @default      = [] of Int32
+        @default = [] of Int32
         if default = options[:default]?
           @default << default
         end
 
-        @choices      = Choices.new
-        @palette      = options[:palette]? || @prompt.palette
-        @cycle        = options[:cycle]? || false
-        @filterable   = options[:filter]? || false
-        @symbols      = @prompt.symbols.merge(options[:symbols]? || {} of Symbol => String)
-        @filter       = [] of String
+        @choices = Choices.new
+        @palette = options[:palette]? || @prompt.palette
+        @cycle = options[:cycle]? || false
+        @filterable = options[:filter]? || false
+        @symbols = @prompt.symbols.merge(options[:symbols]? || {} of Symbol => String)
+        @filter = [] of String
         @filter_cache = {} of String => Array(Choice)
-        @help         = options[:help]?
+        @help = options[:help]?
         @first_render = true
-        @done         = false
-        @page_size    = options[:page_size]? || options[:per_page]? || Paginator::DEFAULT_PAGE_SIZE
-        @paginator    = Paginator.new
+        @done = false
+        @active = 0
+        @page_size = options[:page_size]? || options[:per_page]? || Paginator::DEFAULT_PAGE_SIZE
+        @paginator = Paginator.new
         @block_paginator = BlockPaginator.new
-        @by_page      = false
+        @by_page = false
         @paging_changed = false
 
         Term::Reader.subscribe(:keypress, :return, :up, :down, :left, :right, :backspace, :delete)
@@ -187,21 +189,26 @@ module Term
       end
 
       def keyreturn
-        @done = true unless choices.empty?
+        @done = true if active_choice?
       end
 
       def search_choice_in(searchable)
-        searchable.find { |i| !choices[i - 1].disabled? }
+        searchable.find do |i|
+          choice = choices[i - 1]?
+          choice && !choice.disabled?
+        end
       end
 
       def keyup
-        searchable  = (@active.not_nil! - 1).downto(1).to_a
+        return if choices.empty?
+
+        searchable = (@active.not_nil! - 1).downto(1).to_a
         prev_active = search_choice_in(searchable)
 
         if prev_active
           @active = prev_active
         elsif @cycle
-          searchable  = choices.size.downto(1).to_a
+          searchable = choices.size.downto(1).to_a
           prev_active = search_choice_in(searchable)
 
           @active = prev_active if prev_active
@@ -212,7 +219,9 @@ module Term
       end
 
       def keydown
-        searchable  = ((@active .not_nil!+ 1)..choices.size)
+        return if choices.empty?
+
+        searchable = ((@active.not_nil! + 1)..choices.size)
         next_active = search_choice_in(searchable)
 
         if next_active
@@ -233,18 +242,26 @@ module Term
       # When the choice on a page is outside of next page range then
       # adjust it to the last item, otherwise leave unchanged.
       def keyright
-        if (@active.not_nil! + page_size) <= @choices.size
+        return if choices.empty?
+
+        if (@active.not_nil! + page_size) <= choices.size
           searchable = ((@active.not_nil! + page_size)..choices.size)
-          @active = search_choice_in(searchable)
-        elsif @active.not_nil! <= @choices.size # last page shorter
-          current   = @active.not_nil! % page_size
-          remaining = @choices.size % page_size
+          if next_active = search_choice_in(searchable)
+            @active = next_active
+          end
+        elsif @active.not_nil! <= choices.size # last page shorter
+          current = @active.not_nil! % page_size
+          remaining = choices.size % page_size
           if current.zero? || (remaining > 0 && current > remaining)
-            searchable = @choices.size.downto(0).to_a
-            @active = search_choice_in(searchable)
+            searchable = choices.size.downto(1).to_a
+            if next_active = search_choice_in(searchable)
+              @active = next_active
+            end
           elsif @cycle
             searchable = ((current.zero? ? page_size : current)..choices.size)
-            @active = search_choice_in(searchable)
+            if next_active = search_choice_in(searchable)
+              @active = next_active
+            end
           end
         end
 
@@ -253,12 +270,18 @@ module Term
       end
 
       def keyleft
+        return if choices.empty?
+
         if (@active.not_nil! - page_size) > 0
           searchable = ((@active.not_nil! - page_size)..choices.size)
-          @active = search_choice_in(searchable)
+          if next_active = search_choice_in(searchable)
+            @active = next_active
+          end
         elsif @cycle
-          searchable = @choices.size.downto(1).to_a
-          @active = search_choice_in(searchable)
+          searchable = choices.size.downto(1).to_a
+          if next_active = search_choice_in(searchable)
+            @active = next_active
+          end
         end
         @paging_changed = !@by_page
         @by_page = true
@@ -267,7 +290,7 @@ module Term
       def keypress(key, event)
         if filterable? && event.value =~ FILTER_KEYS_MATCHER
           @filter.not_nil! << event.value.not_nil!
-          @active = 1
+          filter_changed
         end
 
         if event.value.to_s.match(/\d/)
@@ -279,14 +302,14 @@ module Term
         return unless filterable?
 
         @filter.clear
-        @active = 1
+        filter_changed
       end
 
       def keybackspace
         return unless filterable?
 
         @filter.pop?
-        @active = 1
+        filter_changed
       end
 
       private def check_options_consistency(options)
@@ -302,8 +325,36 @@ module Term
         if !@default.empty?
           @active = @default.first
         else
-          @active = (@choices.index { |choice| !choice.disabled? } || 0) + 1
+          activate_first_selectable_choice
         end
+      end
+
+      private def active_choice?
+        return if @active < 1
+
+        choice = choices[@active - 1]?
+        return if choice && choice.disabled?
+        choice
+      end
+
+      private def activate_first_selectable_choice
+        @active = search_choice_in(1..choices.size) || 0
+      end
+
+      private def normalize_active_choice
+        if choices.empty?
+          @active = 0
+        elsif @active < 1 || @active > choices.size || choices[@active - 1].disabled?
+          activate_first_selectable_choice
+        end
+      end
+
+      private def filter_changed
+        @by_page = false
+        @paging_changed = false
+        @paginator.reset!
+        @block_paginator.reset!
+        normalize_active_choice
       end
 
       # Validate default indexes to be within range
@@ -351,7 +402,7 @@ module Term
 
       # Find value for the choice selected
       private def answer
-        choices[@active.not_nil! - 1].value
+        active_choice?.not_nil!.value
       end
 
       # Clear screen lines
@@ -383,7 +434,7 @@ module Term
       # Render initial help and selected choice
       private def render_header
         if @done
-          selected_item = choices[@active.not_nil! - 1].name
+          selected_item = active_choice?.not_nil!.name
           @prompt.decorate(selected_item.to_s, @palette.active)
         elsif @first_render
           @prompt.decorate(help, @palette.help)
@@ -394,6 +445,10 @@ module Term
 
       # Render menu with choices to select from
       private def render_menu
+        if choices.empty?
+          return @prompt.decorate("  No matches", @palette.help)
+        end
+
         output = [] of String
 
         sync_paginators if @paging_changed

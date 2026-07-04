@@ -43,22 +43,22 @@ module Term
 
       # Create instance of EnumList menu.
       def initialize(@prompt : Term::Prompt, **options)
-        @prefix       = options[:prefix]? || @prompt.prefix
-        @separator    = options[:separator]? || ")"
-        @default      = options[:default]? || -1
-        @palette      = options[:palette]? || @prompt.palette
-        @cycle        = options[:cycle]? || false
-        @symbols      = @prompt.symbols.merge(options[:symbols]? || {} of Symbol => String)
-        @input        = nil
-        @done         = false
+        @prefix = options[:prefix]? || @prompt.prefix
+        @separator = options[:separator]? || ")"
+        @default = options[:default]? || -1
+        @palette = options[:palette]? || @prompt.palette
+        @cycle = options[:cycle]? || false
+        @symbols = @prompt.symbols.merge(options[:symbols]? || {} of Symbol => String)
+        @input = nil
+        @done = false
         @first_render = true
-        @failure      = false
-        @active       = @default
-        @choices      = Choices.new
-        @page_size    = options[:page_size]? || options[:per_page]? || Paginator::DEFAULT_PAGE_SIZE
-        @page_help    = options[:page_help]? || PAGE_HELP
-        @paginator    = BlockPaginator.new
-        @page_active  = @default
+        @failure = false
+        @active = @default
+        @choices = Choices.new
+        @page_size = options[:page_size]? || options[:per_page]? || Paginator::DEFAULT_PAGE_SIZE
+        @page_help = options[:page_help]? || PAGE_HELP
+        @paginator = BlockPaginator.new
+        @page_active = @default
 
         Term::Reader.subscribe(:keypress, :return, :enter, :right, :left)
       end
@@ -153,12 +153,10 @@ module Term
 
       # Find active choice or set to default
       def mark_choice_as_active
-        next_active = @choices[(@input.try &.to_i? || 1) - 1]?
-
-        if next_active && next_active.disabled?
-          # noop
-        elsif (@input.try &.to_i? || 0 > 0) && next_active
-          @active = @input.not_nil!.to_i
+        input_index = @input.try &.to_i?
+        if input_index && input_index > 0
+          next_active = @choices[input_index - 1]?
+          @active = input_index if next_active && !next_active.disabled?
         else
           @active = @default
         end
@@ -181,7 +179,7 @@ module Term
       # Setup default option and active selection
       def setup_defaults
         if !default?
-          @default = (0..choices.size).find {|i| !choices[i].disabled? } || 0 + 1
+          @default = (@choices.index { |choice| !choice.disabled? } || -1) + 1
         end
         validate_defaults
         mark_choice_as_active
@@ -289,13 +287,13 @@ module Term
           num = (index + 1).to_s + @separator + ' '
           selected = num.to_s + choice.name.to_s
           output << if index + 1 == @active && !choice.disabled?
-                      (" " * 2) + @prompt.decorate(selected, @palette.active)
-                    elsif choice.disabled?
-                      @prompt.decorate(@symbols[:cross], :red) + ' ' +
-                      selected + ' ' + choice.disabled.to_s
-                    else
-                      (" " * 2) + selected
-                    end
+            (" " * 2) + @prompt.decorate(selected, @palette.active)
+          elsif choice.disabled?
+            @prompt.decorate(@symbols[:cross], :red) + ' ' +
+            selected + ' ' + choice.disabled.to_s
+          else
+            (" " * 2) + selected
+          end
           output << "\n"
         end
 

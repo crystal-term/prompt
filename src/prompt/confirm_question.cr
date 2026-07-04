@@ -49,7 +49,7 @@ module Term
             str << @prompt.decorate("(#{@suffix})", @palette.help) + ' '
           else
             answer = convert_result(@input)
-            label  = answer ? @positive : @negative
+            label = answer ? @positive : @negative
             str << @prompt.decorate(label.to_s, @palette.active)
           end
           str << "\n" if @done
@@ -79,7 +79,7 @@ module Term
       end
 
       def create_default_labels
-        @suffix   = default ? "Y/n" : "y/N"
+        @suffix = default ? "Y/n" : "y/N"
         @positive = default ? "Yes" : "yes"
         @negative = default ? "no" : "No"
         @validators << PatternValidator.new(/^(y(es)?|no?)$/i)
@@ -91,8 +91,8 @@ module Term
       end
 
       def convert_result(value)
-        positive_word   = Regex.escape(positive.to_s)
-        positive_letter = Regex.escape(positive.to_s[0])
+        positive_word = Regex.escape(positive.to_s)
+        positive_letter = Regex.escape(positive.to_s[0].to_s)
         pattern = Regex.new("^#{positive_word}|#{positive_letter}$", Regex::Options::IGNORE_CASE)
         !value.to_s.match(pattern).nil?
       end

@@ -296,7 +296,7 @@ module Term
     #   menu.choices %w(:medium :small)
     # end
     # ```
-    def multi_select(question, choices = nil, **options, &block : List ->)
+    def multi_select(question, choices = nil, **options, &block : MultiList ->)
       choices = choices.nil? ? [] of Choice : choices
       list = MultiList.new(self, **options)
       list.call(question, choices, &block)

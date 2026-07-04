@@ -19,10 +19,23 @@ module Term
         @selected = [] of Choice
         @help = options[:help]?
         @echo = options[:echo]?.nil? ? true : !!options[:echo]?
-        @min  = options[:min]?
-        @max  = options[:max]?
+        @min = options[:min]?
+        @max = options[:max]?
 
         Term::Reader.subscribe(:space)
+      end
+
+      def call(question, possibilities, &block : MultiList ->)
+        choices(possibilities)
+        @question = question
+        block.call(self)
+        setup_defaults
+        render
+      end
+
+      def default=(values : Array(Int32))
+        @default.clear
+        values.each { |value| @default << value }
       end
 
       # Callback fired when enter/return key is pressed
@@ -76,7 +89,7 @@ module Term
         help = [] of String
         help << "min. #{@min}" if @min
         help << "max. #{@max}" if @max
-        "(%s) " % [ help.join(" ") ]
+        "(%s) " % [help.join(" ")]
       end
 
       # Render initial help text and then currently selected choices
@@ -111,7 +124,7 @@ module Term
         sync_paginators if @paging_changed
         paginator.paginate(choices, @active.not_nil!, @page_size) do |choice, index|
           num = enumerate? ? (index + 1).to_s + @separator.not_nil! + " " : ""
-          indicator = (index + 1 == @active.not_nil!) ?  @symbols[:marker] : " "
+          indicator = (index + 1 == @active.not_nil!) ? @symbols[:marker] : " "
           indicator += " "
           message = if @selected.includes?(choice) && !choice.disabled?
                       selected = @prompt.decorate(@symbols[:radio_on], @palette.active)
