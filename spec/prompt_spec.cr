@@ -41,8 +41,20 @@ private def key_event(value)
 end
 
 describe Term::Prompt do
+  after_each do
+    Term::Color.enabled = nil
+  end
+
   it "has a version Number" do
     Term::Prompt::VERSION.should match(/\d+\.\d+\.\d+/)
+  end
+
+  describe "#decorate" do
+    it "returns plain text when term color is disabled" do
+      Term::Color.enabled = false
+
+      Term::Prompt.new.decorate("hi", :red).should eq("hi")
+    end
   end
 
   describe Term::Prompt::ConfirmQuestion do
