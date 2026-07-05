@@ -59,8 +59,6 @@ module Term
         @page_help = options[:page_help]? || PAGE_HELP
         @paginator = BlockPaginator.new
         @page_active = @default
-
-        Term::Reader.subscribe(:keypress, :enter, :right, :left)
       end
 
       # Change symbols used by this prompt
@@ -187,6 +185,9 @@ module Term
 
       # Render a selection list.
       def render
+        @prompt.reader.clear_component_handlers
+        register_subscriptions
+
         @input = ""
         until @done
           question = render_question
@@ -219,6 +220,10 @@ module Term
       def refresh(lines)
         @prompt.clear_lines(lines) +
           @prompt.cursor.clear_screen_down
+      end
+
+      private def register_subscriptions
+        Term::Reader.subscribe(@prompt.reader, :keypress, :enter, :right, :left)
       end
 
       # Render question with the menu options

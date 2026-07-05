@@ -48,6 +48,11 @@ class Term::Prompt::List
   def spec_answer
     answer
   end
+
+  def spec_register_subscriptions
+    @prompt.reader.clear_component_handlers
+    register_subscriptions
+  end
 end
 
 class Term::Prompt::MultiList

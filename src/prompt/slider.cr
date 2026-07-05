@@ -19,20 +19,18 @@ module Term
 
       # Initialize a Slider
       def initialize(@prompt : Term::Prompt, **options)
-        @prefix       = options[:prefix]? || @prompt.prefix
-        @min          = options[:min]? || 0
-        @max          = options[:max]? || 10
-        @step         = options[:step]? || 1
-        @_default     = options[:default]?
-        @palette      = options[:palette]? || @prompt.palette
-        @format       = options[:format]? || FORMAT
-        @symbols      = @prompt.symbols.merge(options[:symbols]? || {} of Symbol => String)
+        @prefix = options[:prefix]? || @prompt.prefix
+        @min = options[:min]? || 0
+        @max = options[:max]? || 10
+        @step = options[:step]? || 1
+        @_default = options[:default]?
+        @palette = options[:palette]? || @prompt.palette
+        @format = options[:format]? || FORMAT
+        @symbols = @prompt.symbols.merge(options[:symbols]? || {} of Symbol => String)
         @first_render = true
-        @done         = false
-        @question     = nil
-        @active       = 0
-
-        Term::Reader.subscribe(:enter, :left, :right, :up, :down)
+        @done = false
+        @question = nil
+        @active = 0
       end
 
       # Change symbols used by this prompt
@@ -116,6 +114,9 @@ module Term
 
       # Render an interactive range slider.
       private def render
+        @prompt.reader.clear_component_handlers
+        register_subscriptions
+
         @prompt.print(@prompt.hide)
         until @done
           question = render_question
@@ -132,6 +133,10 @@ module Term
       # Clear screen
       private def refresh(lines)
         @prompt.print(@prompt.clear_lines(lines))
+      end
+
+      private def register_subscriptions
+        Term::Reader.subscribe(@prompt.reader, :enter, :left, :right, :up, :down)
       end
 
       # @return [Integer]

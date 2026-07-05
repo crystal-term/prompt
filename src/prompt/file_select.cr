@@ -42,16 +42,14 @@ module Term
         @file_only = options[:file_only]? || false
         @dir_only = options[:dir_only]? || false
         @result = nil
-
-        Term::Reader.subscribe(:enter, :up, :down, :left, :right)
       end
 
       # Get current directory entries
       def entries
         return [] of {String, Symbol} unless Dir.exists?(@current_path)
-        
+
         items = [] of {String, Symbol}
-        
+
         # Add parent directory unless at root
         unless @current_path == "/"
           items << {"..", :directory}
@@ -61,21 +59,21 @@ module Term
           Dir.entries(@current_path).each do |entry|
             next if entry == "." || entry == ".."
             next if !@show_hidden && entry.starts_with?(".")
-            
+
             full_path = File.join(@current_path, entry)
-            
+
             if Dir.exists?(full_path)
               next if @file_only
               items << {entry, :directory}
             elsif File.exists?(full_path)
               next if @dir_only
-              
+
               # Filter by extension if specified
               if ext_filter = @filter_ext
                 ext = File.extname(entry).downcase
                 next unless ext_filter.includes?(ext)
               end
-              
+
               items << {entry, :file}
             end
           end
@@ -108,7 +106,7 @@ module Term
 
       def keyup
         return if entries.empty?
-        
+
         if @active > 1
           @active -= 1
         elsif @cycle
@@ -118,7 +116,7 @@ module Term
 
       def keydown
         return if entries.empty?
-        
+
         if @active < entries.size
           @active += 1
         elsif @cycle
@@ -129,17 +127,17 @@ module Term
       def keyleft
         # Go up one directory
         return if @current_path == "/"
-        
+
         @current_path = File.dirname(@current_path)
         @active = 1
       end
 
       def keyright
         return if entries.empty? || @active > entries.size
-        
+
         entry_name, entry_type = entries[@active - 1]
         return unless entry_type == :directory
-        
+
         if entry_name == ".."
           keyleft
         else
@@ -153,9 +151,9 @@ module Term
 
       def keyenter
         return if entries.empty? || @active > entries.size
-        
+
         entry_name, entry_type = entries[@active - 1]
-        
+
         case entry_type
         when :directory
           if entry_name == ".."
@@ -188,6 +186,9 @@ module Term
 
       # Render the file select prompt
       private def render
+        @prompt.reader.clear_component_handlers
+        register_subscriptions
+
         @prompt.print(@prompt.hide)
         until @done
           question = render_question
@@ -220,16 +221,20 @@ module Term
         @prompt.clear_lines(lines)
       end
 
+      private def register_subscriptions
+        Term::Reader.subscribe(@prompt.reader, :enter, :up, :down, :left, :right)
+      end
+
       # Render the complete question with file list
       private def render_question
         String.build do |str|
           str << "#{@prefix}#{@question} #{render_header}\n"
-          
+
           unless @done
             # Show current path
             str << @prompt.decorate("Path: #{@current_path}", @palette.help)
             str << "\n\n"
-            
+
             # Show entries
             current_entries = entries
             if current_entries.empty?
@@ -241,7 +246,7 @@ module Term
                 else
                   str << "    "
                 end
-                
+
                 case entry_type
                 when :directory
                   if entry_name == ".."
@@ -254,7 +259,7 @@ module Term
                 when :error
                   str << @prompt.decorate("❌ #{entry_name}", @palette.error)
                 end
-                
+
                 str << "\n" unless index == current_entries.size - 1
               end
             end

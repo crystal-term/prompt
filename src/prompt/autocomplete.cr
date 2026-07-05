@@ -44,8 +44,6 @@ module Term
         @page_size = options[:page_size]? || options[:per_page]? || 10
         @separator = options[:separator]?
         @choices = [] of Choice
-
-        Term::Reader.subscribe(:keypress, :enter, :up, :down, :backspace, :delete, :tab)
       end
 
       # Set choices
@@ -62,7 +60,7 @@ module Term
       # Get filtered choices based on current input
       def suggestions
         return @choices if @search_query.empty?
-        
+
         @suggestions_cache[@search_query] ||= @choices.select do |choice|
           !choice.disabled? && choice.name.downcase.includes?(@search_query.downcase)
         end
@@ -90,7 +88,7 @@ module Term
       # Handle key events
       def keypress(key, event)
         char = event.value
-        
+
         # Add printable characters to search query and input
         if char =~ /\A[[:print:]]\Z/ && char != "\t" && char != "\n" && char != "\r"
           @search_query += char
@@ -102,7 +100,7 @@ module Term
 
       def keybackspace
         return if @search_query.empty?
-        
+
         @search_query = @search_query[0...-1]
         @input = @search_query
         @active = 1
@@ -118,7 +116,7 @@ module Term
 
       def keyup
         return if suggestions.empty?
-        
+
         if @active > 1
           @active -= 1
         elsif @cycle
@@ -128,7 +126,7 @@ module Term
 
       def keydown
         return if suggestions.empty?
-        
+
         if @active < suggestions.size
           @active += 1
         elsif @cycle
@@ -138,7 +136,7 @@ module Term
 
       def keytab
         return if suggestions.empty?
-        
+
         # Complete with current selection
         if @active <= suggestions.size
           selected = suggestions[@active - 1]
@@ -167,11 +165,14 @@ module Term
       end
 
       private def update_suggestions
-        @suggestions_cache.clear  # Clear cache when search changes
+        @suggestions_cache.clear # Clear cache when search changes
       end
 
       # Render the autocomplete prompt
       private def render
+        @prompt.reader.clear_component_handlers
+        register_subscriptions
+
         @prompt.print(@prompt.hide)
         until @done
           question = render_question
@@ -204,16 +205,20 @@ module Term
         @prompt.clear_lines(lines)
       end
 
+      private def register_subscriptions
+        Term::Reader.subscribe(@prompt.reader, :keypress, :enter, :up, :down, :backspace, :delete, :tab)
+      end
+
       # Render the complete question with suggestions
       private def render_question
         String.build do |str|
           str << "#{@prefix}#{@question} #{render_header}\n"
-          
+
           # Show current input
           str << @prompt.decorate("❯ #{@input}", @palette.active)
           str << @prompt.decorate("█", @palette.active) unless @done
           str << "\n"
-          
+
           # Show suggestions
           if !suggestions.empty? && !@done
             suggestions.each_with_index do |choice, index|

@@ -5,8 +5,8 @@ module Term
     #
     # @api private
     class EnhancedConfirm
-      DESTRUCTIVE_HELP = "(Type 'yes' to confirm destructive action)"
-      CONFIRM_HELP = "(Type 'yes' to confirm)"
+      DESTRUCTIVE_HELP    = "(Type 'yes' to confirm destructive action)"
+      CONFIRM_HELP        = "(Type 'yes' to confirm)"
       DOUBLE_CONFIRM_HELP = "(Type 'yes' twice to confirm)"
 
       @prompt : Prompt
@@ -35,8 +35,6 @@ module Term
         @input = ""
         @confirmations = [] of String
         @palette = options[:palette]? || @prompt.palette
-
-        Term::Reader.subscribe(:keypress, :enter, :backspace, :delete)
       end
 
       # Call the enhanced confirmation prompt
@@ -49,7 +47,7 @@ module Term
       # Handle key events
       def keypress(key, event)
         char = event.value
-        
+
         # Add printable characters to input
         if char =~ /\A[[:print:]]\Z/ && char != "\n" && char != "\r"
           @input += char
@@ -71,7 +69,7 @@ module Term
             if @double_confirm
               @confirmations << @input
               @input = ""
-              
+
               if @confirmations.size >= 2
                 @done = true
               end
@@ -116,6 +114,9 @@ module Term
 
       # Render the enhanced confirmation prompt
       private def render
+        @prompt.reader.clear_component_handlers
+        register_subscriptions
+
         @prompt.print(@prompt.hide)
         until @done
           question = render_question
@@ -126,7 +127,7 @@ module Term
           @prompt.print(refresh(question_lines_size(question_lines)))
         end
         @prompt.print(render_question)
-        @prompt.print("\n")  # Add newline after final result
+        @prompt.print("\n") # Add newline after final result
         result
       ensure
         @prompt.print(@prompt.show)
@@ -144,11 +145,15 @@ module Term
         @prompt.clear_lines(lines)
       end
 
+      private def register_subscriptions
+        Term::Reader.subscribe(@prompt.reader, :keypress, :enter, :backspace, :delete)
+      end
+
       # Render the complete question
       private def render_question
         String.build do |str|
           str << "#{@prefix}#{@question} #{render_header}\n"
-          
+
           unless @done
             # Show warning if destructive
             if @destructive && @warning_message
@@ -158,13 +163,13 @@ module Term
               str << @prompt.decorate("⚠️  This action cannot be undone!", @palette.error)
               str << "\n"
             end
-            
+
             # Show double confirmation progress
             if @double_confirm && !@confirmations.empty?
               str << @prompt.decorate("First confirmation received. Please confirm again:", @palette.help)
               str << "\n"
             end
-            
+
             # Show input prompt
             if @destructive || @require_exact
               color = @destructive ? @palette.error : @palette.active
@@ -172,7 +177,7 @@ module Term
             else
               str << "Confirm (y/n): "
             end
-            
+
             # Show current input
             str << @input
             str << @prompt.decorate("█", @palette.active) unless @done
@@ -194,12 +199,12 @@ module Term
         elsif @first_render
           @first_render = false
           help_text = if @double_confirm
-            DOUBLE_CONFIRM_HELP
-          elsif @destructive || @require_exact
-            @destructive ? DESTRUCTIVE_HELP : CONFIRM_HELP
-          else
-            "(y/N)"
-          end
+                        DOUBLE_CONFIRM_HELP
+                      elsif @destructive || @require_exact
+                        @destructive ? DESTRUCTIVE_HELP : CONFIRM_HELP
+                      else
+                        "(y/N)"
+                      end
           @prompt.decorate(help_text, @palette.help)
         else
           ""

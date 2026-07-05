@@ -31,24 +31,24 @@ module Term
       @input : String?
 
       def initialize(prompt, **options)
-        @prompt       = prompt
-        @prefix       = options[:prefix]? || @prompt.prefix
-        @validators   = [] of Validator | ValidatorProc
-        @default      = options[:default]?
-        @palette      = options[:palette]? || @prompt.palette
-        @echo         = options[:echo]?.nil? ? true : !!options[:echo]?
-        @value        = options[:value]?
-        @errors       = [] of String
-        @warnings     = [] of String
-        @input        = @value
-        @done         = false
+        @prompt = prompt
+        @prefix = options[:prefix]? || @prompt.prefix
+        @validators = [] of Validator | ValidatorProc
+        @default = options[:default]?
+        @palette = options[:palette]? || @prompt.palette
+        @echo = options[:echo]?.nil? ? true : !!options[:echo]?
+        @value = options[:value]?
+        @errors = [] of String
+        @warnings = [] of String
+        @input = @value
+        @done = false
         @first_render = true
 
         if validators = options[:validators]?
           @validators.concat validators
         end
 
-        required     = options[:required]? || false
+        required = options[:required]? || false
         @validators << RequiredValidator.new if required
 
         min = options[:min_length]?
@@ -77,11 +77,14 @@ module Term
 
       # ditto
       def call(message = "")
-        call(message) {}
+        call(message) { }
       end
 
       # Read answer and convert to type
       def render
+        @prompt.reader.clear_component_handlers
+        register_subscriptions
+
         until @done
           @errors.clear
           @warnings.clear
@@ -102,7 +105,7 @@ module Term
             @done = true
           end
 
-          question =  render_question
+          question = render_question
           input_line = question + result.value.to_s
           total_lines = @prompt.count_screen_lines(input_line, Term::Screen.width)
           @prompt.print(refresh(question.lines.size, total_lines))
@@ -154,6 +157,9 @@ module Term
         else
           @prompt.read_line(prompt: question, echo: @echo).chomp
         end
+      end
+
+      private def register_subscriptions
       end
 
       def render_error(errors)
