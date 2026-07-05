@@ -64,7 +64,7 @@ module Term
         @by_page = false
         @paging_changed = false
 
-        Term::Reader.subscribe(:keypress, :return, :up, :down, :left, :right, :backspace, :delete)
+        Term::Reader.subscribe(:keypress, :enter, :up, :down, :left, :right, :backspace, :delete)
       end
 
       # Set default option selected
@@ -190,6 +190,10 @@ module Term
 
       def keyreturn
         @done = true if active_choice?
+      end
+
+      def keyenter
+        keyreturn
       end
 
       def search_choice_in(searchable)

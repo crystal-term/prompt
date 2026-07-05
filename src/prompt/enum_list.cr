@@ -60,7 +60,7 @@ module Term
         @paginator = BlockPaginator.new
         @page_active = @default
 
-        Term::Reader.subscribe(:keypress, :return, :enter, :right, :left)
+        Term::Reader.subscribe(:keypress, :enter, :right, :left)
       end
 
       # Change symbols used by this prompt

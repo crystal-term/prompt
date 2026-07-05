@@ -43,7 +43,7 @@ module Term
         @dir_only = options[:dir_only]? || false
         @result = nil
 
-        Term::Reader.subscribe(:return, :enter, :up, :down, :left, :right)
+        Term::Reader.subscribe(:enter, :up, :down, :left, :right)
       end
 
       # Get current directory entries

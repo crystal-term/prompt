@@ -39,7 +39,7 @@ module Term
         @hint         = nil
         @default_key  = false
 
-        Term::Reader.subscribe(:enter, :return, :keypress)
+        Term::Reader.subscribe(:enter, :keypress)
       end
 
       def expanded?

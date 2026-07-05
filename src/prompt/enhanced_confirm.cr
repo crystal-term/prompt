@@ -36,7 +36,7 @@ module Term
         @confirmations = [] of String
         @palette = options[:palette]? || @prompt.palette
 
-        Term::Reader.subscribe(:keypress, :return, :enter, :backspace, :delete)
+        Term::Reader.subscribe(:keypress, :enter, :backspace, :delete)
       end
 
       # Call the enhanced confirmation prompt

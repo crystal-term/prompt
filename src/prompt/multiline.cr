@@ -11,7 +11,7 @@ module Term
         @first_render = true
         @lines_count = 0
 
-        Term::Reader.subscribe(:return, :enter)
+        Term::Reader.subscribe(:enter)
       end
 
       def read_input

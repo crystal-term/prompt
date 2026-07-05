@@ -9,7 +9,7 @@ module Term
         @done_masked = false
         @failure = false
 
-        Term::Reader.subscribe(:keypress, :return, :enter)
+        Term::Reader.subscribe(:keypress, :enter)
       end
 
       # Call the question.

@@ -130,6 +130,15 @@ describe Term::Prompt do
       list.spec_done.should be_true
       list.spec_answer.should eq("Kano")
     end
+
+    it "marks the list done when the enter key event fires" do
+      list = Term::Prompt::List.new(Term::Prompt.new)
+      list.choices %w(a b c)
+      list.spec_setup_defaults
+
+      Term::Reader.global_handlers["enter"].each &.call("enter", key_event("\r"))
+      list.spec_done.should be_true
+    end
   end
 
   describe Term::Prompt::MultiList do

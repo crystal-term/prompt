@@ -32,7 +32,7 @@ module Term
         @question     = nil
         @active       = 0
 
-        Term::Reader.subscribe(:return, :enter, :left, :right, :up, :down)
+        Term::Reader.subscribe(:enter, :left, :right, :up, :down)
       end
 
       # Change symbols used by this prompt

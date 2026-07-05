@@ -45,7 +45,7 @@ module Term
         @separator = options[:separator]?
         @choices = [] of Choice
 
-        Term::Reader.subscribe(:keypress, :return, :enter, :up, :down, :backspace, :delete, :tab)
+        Term::Reader.subscribe(:keypress, :enter, :up, :down, :backspace, :delete, :tab)
       end
 
       # Set choices
