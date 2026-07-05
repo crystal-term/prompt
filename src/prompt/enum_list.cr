@@ -79,12 +79,13 @@ module Term
       end
 
       # Add a single choice
-      def choice(*value, &block)
-        if block
-          @choices << (value << block)
-        else
-          @choices << value
-        end
+      def choice(*value)
+        @choices << Choice.new(*value)
+      end
+
+      # Add a single choice with a computed value
+      def choice(*value, &block : -> String)
+        @choices << Choice.new(*(value + {block}))
       end
 
       # Add multiple choices

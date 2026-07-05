@@ -51,6 +51,4 @@ describe Term::Prompt::Expander do
 
     expander.hint.should eq("Overwrite")
   end
-
-  pending "fixed by plan 008: Expander#choices getter should return configured choices"
 end

@@ -75,5 +75,15 @@ describe Term::Prompt::EnumList do
     list.failure.should be_true
   end
 
-  pending "fixed by plan 008: EnumList#choice with a block should add a computed choice"
+  it "adds a computed choice with a block" do
+    list = Term::Prompt::EnumList.new(term_prompt)
+    list.choice("current shell") { "zsh" }
+    list.setup_defaults
+
+    list.keypress("1", key_event("1"))
+    list.keyenter
+
+    list.done.should be_true
+    list.answer.should eq("zsh")
+  end
 end
