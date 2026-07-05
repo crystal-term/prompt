@@ -49,7 +49,7 @@ module Term
       @prefix = options[:prefix]? || ""
       @palette = options[:palette]? || Palette.new
       @interrupt = options[:interrupt]? || :error
-      @track_history = options[:track_history]? || true
+      @track_history = options[:track_history]?.nil? ? true : !!options[:track_history]?
       @symbols = Symbols.symbols.merge(options[:symbols]? || {} of Symbol => String)
 
       @cursor = Term::Cursor

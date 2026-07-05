@@ -39,7 +39,11 @@ describe Term::Prompt do
     end
   end
 
-  pending "fixed by plan 008" do
-    Term::Prompt.new(track_history: false).track_history.should be_false
+  it "passes explicit track_history false to the reader" do
+    prompt = Term::Prompt.new(track_history: false)
+
+    prompt.track_history.should be_false
+    prompt.reader.track_history?.should be_false
+    Term::Prompt.new.reader.track_history?.should be_true
   end
 end
