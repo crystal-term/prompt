@@ -51,12 +51,24 @@ describe Term::Prompt::EnumList do
     list.spec_page_active.should eq(1)
   end
 
-  pending "fixed by plan 008" do
+  it "rejects out-of-range numeric input without raising" do
     list = Term::Prompt::EnumList.new(term_prompt)
     list.choices = %w(emacs nano vim)
     list.setup_defaults
 
     list.keypress("9", key_event("9"))
+    list.keyenter
+
+    list.done.should be_false
+    list.failure.should be_true
+  end
+
+  it "does not treat zero as the last choice" do
+    list = Term::Prompt::EnumList.new(term_prompt)
+    list.choices = %w(emacs nano vim)
+    list.setup_defaults
+
+    list.keypress("0", key_event("0"))
     list.keyenter
 
     list.done.should be_false
