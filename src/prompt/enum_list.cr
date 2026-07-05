@@ -79,12 +79,13 @@ module Term
       end
 
       # Add a single choice
-      def choice(*value, &block)
-        if block
-          @choices << (value << block)
-        else
-          @choices << value
-        end
+      def choice(*value)
+        @choices << Choice.new(*value)
+      end
+
+      # Add a single choice with a computed value
+      def choice(*value, &block : -> String)
+        @choices << Choice.new(*(value + {block}))
       end
 
       # Add multiple choices
@@ -120,8 +121,8 @@ module Term
       def keyreturn
         @failure = false
         num = @input.to_s.to_i? || 0
-        choice_disabled = choices[num - 1] && choices[num - 1].disabled?
         choice_in_range = num > 0 && num <= @choices.size
+        choice_disabled = choice_in_range && choices[num - 1].disabled?
 
         if choice_in_range && !choice_disabled || (@input && @input.not_nil!.empty?)
           @done = true

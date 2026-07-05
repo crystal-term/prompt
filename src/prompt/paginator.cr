@@ -82,12 +82,6 @@ module Term
         end
       end
 
-      # Paginate collection given an active index
-      def paginate(list, active, page_size = nil)
-        list = [] of Tuple(Choice, Int32)
-        paginate { |e, i| list << {e, i} }
-        list
-      end
     end
   end
 end

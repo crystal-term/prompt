@@ -125,18 +125,6 @@ module Term
         end
       end
 
-      # Get choices
-      def choices
-        if !filterable? || @filter.empty?
-          @choices
-        else
-          filter_value = @filter.join.downcase
-          @filter_cache[filter_value] ||= @choices.select do |choice|
-            !choice.disabled? && choice.name.downcase.includes?(filter_value)
-          end
-        end
-      end
-
       # Execute this prompt
       def call(message, possibilities, &block : self ->)
         choices(possibilities)

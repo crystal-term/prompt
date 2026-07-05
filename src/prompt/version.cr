@@ -1,5 +1,5 @@
 module Term
   class Prompt
-    VERSION = {{ `shards version #{__DIR__}`.chomp.stringify }}
+    VERSION = "1.0.0"
   end
 end

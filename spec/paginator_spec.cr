@@ -26,8 +26,6 @@ describe Term::Prompt::Paginator do
 
     page_names(Term::Prompt::Paginator.new, choices, 7, 3).should eq(%w(e f g))
   end
-
-  pending "fixed by plan 008: blockless Paginator#paginate should return choice-index tuples"
 end
 
 describe Term::Prompt::BlockPaginator do
