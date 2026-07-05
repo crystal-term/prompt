@@ -995,7 +995,7 @@ The choices can also be provided through the DSL using the `choice` method:
 
 ```crystal
 prompt.expand("Overwrite shard.yml?") do |q|
-  q.choice key: "y", name: "Overwrite"      value: "ok"
+  q.choice key: "y", name: "Overwrite",     value: "ok"
   q.choice key: "n", name: "Skip",          value: "no"
   q.choice key: "a", name: "Overwrite all", value: "all"
   q.choice key: "d", name: "Show diff",     value: "diff"
@@ -1006,7 +1006,7 @@ end
 The first element in the array of choices or provided via the choice DSL will be the default choice, you can change that by passing default option.
 
 ```crystal
-prompt.expand('Overwrite shard.yml?', choices, default: 1)
+prompt.expand("Overwrite shard.yml?", choices, default: 1)
 # =>
 # Overwrite shard.yml? (enter "h" for help) [y,n,q,h]
 ```
@@ -1036,7 +1036,7 @@ Run `examples/expand.cr` to see the prompt in action.
 To show the hint by default use the `:auto_hint` option:
 
 ```crystal
-prompt.expand('Overwrite shard.yml?', choices, auto_hint: true)
+prompt.expand("Overwrite shard.yml?", choices, auto_hint: true)
 # =>
 # Overwrite shard.yml? (enter "h" for help) [y,n,q,h]
 # >> overwrite this file
