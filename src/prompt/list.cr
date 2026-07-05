@@ -63,8 +63,6 @@ module Term
         @block_paginator = BlockPaginator.new
         @by_page = false
         @paging_changed = false
-
-        Term::Reader.subscribe(:keypress, :enter, :up, :down, :left, :right, :backspace, :delete)
       end
 
       # Set default option selected
@@ -380,6 +378,9 @@ module Term
       #
       # By default the result is printed out.
       private def render
+        @prompt.reader.clear_component_handlers
+        register_subscriptions
+
         @prompt.print(@prompt.hide)
         until @done
           question = render_question
@@ -412,6 +413,10 @@ module Term
       # Clear screen lines
       private def refresh(lines)
         @prompt.clear_lines(lines)
+      end
+
+      private def register_subscriptions
+        Term::Reader.subscribe(@prompt.reader, :keypress, :enter, :up, :down, :left, :right, :backspace, :delete)
       end
 
       # Render question with instructions and menu

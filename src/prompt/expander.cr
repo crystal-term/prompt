@@ -9,9 +9,9 @@ module Term
       end
 
       HELP_CHOICE = {
-        key: "h",
-        name: "print help",
-        value: "help"
+        key:   "h",
+        name:  "print help",
+        value: "help",
       }
 
       getter prefix : String
@@ -31,15 +31,13 @@ module Term
                      @default = 1,
                      @auto_hint = false,
                      @palette = prompt.palette)
-        @prompt       = prompt
-        @choices      = Choices.new
-        @selected     = nil
-        @done         = false
-        @status       = Status::Collapsed
-        @hint         = nil
-        @default_key  = false
-
-        Term::Reader.subscribe(:enter, :keypress)
+        @prompt = prompt
+        @choices = Choices.new
+        @selected = nil
+        @done = false
+        @status = Status::Collapsed
+        @hint = nil
+        @default_key = false
       end
 
       def expanded?
@@ -154,6 +152,9 @@ module Term
       end
 
       private def render
+        @prompt.reader.clear_component_handlers
+        register_subscriptions
+
         @input = ""
         until @done
           question = render_question
@@ -169,6 +170,10 @@ module Term
         if selected = @selected
           selected.value
         end
+      end
+
+      private def register_subscriptions
+        Term::Reader.subscribe(@prompt.reader, :enter, :keypress)
       end
 
       # Render message with options
@@ -262,5 +267,5 @@ module Term
         # validate_choices
       end
     end # Expander
-  end # Prompt
-end # Term
+  end   # Prompt
+end     # Term

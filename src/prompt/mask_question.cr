@@ -8,8 +8,6 @@ module Term
         @mask = mask || prompt.symbols[:dot]
         @done_masked = false
         @failure = false
-
-        Term::Reader.subscribe(:keypress, :enter)
       end
 
       # Call the question.
@@ -56,6 +54,10 @@ module Term
       def render_error(errors)
         @failure = !errors.empty?
         super
+      end
+
+      private def register_subscriptions
+        Term::Reader.subscribe(@prompt.reader, :keypress, :enter)
       end
 
       def read_input(question)

@@ -10,8 +10,6 @@ module Term
         super(prompt, **options)
         @echo = echo || false
         @keys = keys ? keys.map(&.to_s) : [] of String
-
-        Term::Reader.subscribe(:keypress)
       end
 
       def any_key?
@@ -26,6 +24,10 @@ module Term
         else
           @done = false
         end
+      end
+
+      private def register_subscriptions
+        Term::Reader.subscribe(@prompt.reader, :keypress)
       end
 
       def process_input(question)

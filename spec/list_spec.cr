@@ -80,12 +80,32 @@ describe Term::Prompt::List do
   end
 
   it "marks the list done when the enter key event fires" do
-    list = Term::Prompt::List.new(term_prompt)
+    prompt = term_prompt
+    list = Term::Prompt::List.new(prompt)
     list.choices %w(a b c)
     list.spec_setup_defaults
+    list.spec_register_subscriptions
 
-    Term::Reader.global_handlers["enter"].each &.call("enter", key_event("\r"))
+    prompt.reader.component_handlers["enter"].each &.call("enter", key_event("\r"))
     list.spec_done.should be_true
+  end
+
+  it "scopes key handlers to the most recently registered list" do
+    prompt = term_prompt
+    first = Term::Prompt::List.new(prompt)
+    first.choices %w(a b c)
+    first.spec_setup_defaults
+
+    second = Term::Prompt::List.new(prompt)
+    second.choices %w(one two three)
+    second.spec_setup_defaults
+
+    first.spec_register_subscriptions
+    second.spec_register_subscriptions
+    prompt.reader.component_handlers["down"].each &.call("down", key_event("\e[B", "down"))
+
+    first.spec_active.should eq(1)
+    second.spec_active.should eq(2)
   end
 end
 

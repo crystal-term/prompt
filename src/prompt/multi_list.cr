@@ -21,8 +21,6 @@ module Term
         @echo = options[:echo]?.nil? ? true : !!options[:echo]?
         @min = options[:min]?
         @max = options[:max]?
-
-        Term::Reader.subscribe(:space)
       end
 
       def call(question, possibilities, &block : MultiList ->)
@@ -115,6 +113,11 @@ module Term
       # All values for the choices selected
       def answer
         @selected.map(&.value)
+      end
+
+      private def register_subscriptions
+        super
+        Term::Reader.subscribe(@prompt.reader, :space)
       end
 
       # Render menu with choices to select from

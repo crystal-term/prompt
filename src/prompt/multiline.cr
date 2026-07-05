@@ -10,8 +10,6 @@ module Term
         @help = help
         @first_render = true
         @lines_count = 0
-
-        Term::Reader.subscribe(:enter)
       end
 
       def read_input
@@ -24,6 +22,10 @@ module Term
 
       def keyenter
         keyreturn
+      end
+
+      private def register_subscriptions
+        Term::Reader.subscribe(@prompt.reader, :enter)
       end
 
       def render_question
