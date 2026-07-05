@@ -17,8 +17,8 @@ module Term
       def initialize(prompt, default = nil, suffix = nil, positive = nil, negative = nil, **options)
         super(prompt, **options)
         @suffix = suffix
-        @positive = suffix
-        @negative = suffix
+        @positive = positive
+        @negative = negative
         @_default = default || false
       end
 
@@ -93,7 +93,7 @@ module Term
       def convert_result(value)
         positive_word = Regex.escape(positive.to_s)
         positive_letter = Regex.escape(positive.to_s[0].to_s)
-        pattern = Regex.new("^#{positive_word}|#{positive_letter}$", Regex::Options::IGNORE_CASE)
+        pattern = Regex.new("^(#{positive_word}|#{positive_letter})$", Regex::Options::IGNORE_CASE)
         !value.to_s.match(pattern).nil?
       end
     end

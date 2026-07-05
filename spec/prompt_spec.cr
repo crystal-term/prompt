@@ -22,16 +22,20 @@ describe Term::Prompt do
       question = Term::Prompt::ConfirmQuestion.new(Term::Prompt.new, true)
       question.setup_defaults
 
-      question.convert_result("Y").should be_true
+      question.convert_result("y").should be_true
+      question.convert_result("Yes").should be_true
       question.convert_result("n").should be_false
+      question.convert_result("okay").should be_false
     end
 
-    pending "fixed by plan 008" do
-      question = Term::Prompt::ConfirmQuestion.new(Term::Prompt.new, true, "Y/n", "Proceed", "Cancel")
+    it "uses custom positive and negative labels" do
+      question = Term::Prompt::ConfirmQuestion.new(Term::Prompt.new, true, nil, "ja", "nein")
       question.setup_defaults
 
-      question.positive.should eq("Proceed")
-      question.negative.should eq("Cancel")
+      question.positive.should eq("ja")
+      question.negative.should eq("nein")
+      question.convert_result("ja").should be_true
+      question.convert_result("nein").should be_false
     end
   end
 
