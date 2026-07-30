@@ -1,0 +1,53 @@
+name: Examples
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        example:
+          - ask.cr
+          - ask_blank.cr
+          - ask_multiline.cr
+          - ask_validate.cr
+          - autocomplete.cr
+          - collect.cr
+          - confirm.cr
+          - enum_list.cr
+          - enum_list_disabled.cr
+          - enum_list_paged.cr
+          - expand.cr
+          - expand_auto.cr
+          - file_select.cr
+          - keypress.cr
+          - mask.cr
+          - multi_select.cr
+          - multi_select_disabled.cr
+          - multi_select_disabled_paged.cr
+          - multi_select_min_max.cr
+          - multi_select_paged.cr
+          - multiline.cr
+          - noecho.cr
+          - project_generator.cr
+          - select.cr
+          - select_disabled.cr
+          - select_filtered.cr
+          - select_paged.cr
+          - slider.cr
+    name: ${{ matrix.example }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: crystal-lang/install-crystal@v1
+        with:
+          crystal: latest
+      - name: Install system dependencies
+        run: sudo apt-get install -y libreadline-dev
+      - name: Install crystal dependencies
+        run: shards install
+      - name: Build ${{ matrix.example }}
+        run: crystal build examples/${{ matrix.example }} --error-trace
